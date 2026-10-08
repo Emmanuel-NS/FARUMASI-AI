@@ -1,0 +1,45 @@
+{
+  "corpus_passages": 8250,
+  "corpus_by_source": {
+    "openFDA": 2049,
+    "MedQuAD": 5546,
+    "MedicationQA": 655
+  },
+  "qa_total": 8758,
+  "qa_by_source": {
+    "MedQuAD": 5580,
+    "openFDA-templated": 2523,
+    "MedicationQA": 655
+  },
+  "splits": {
+    "train": {
+      "n": 7028,
+      "focus_entities": 1652,
+      "by_source": {
+        "MedQuAD": 4528,
+        "openFDA-templated": 1977,
+        "MedicationQA": 523
+      }
+    },
+    "val": {
+      "n": 803,
+      "focus_entities": 207,
+      "by_source": {
+        "MedQuAD": 520,
+        "openFDA-templated": 229,
+        "MedicationQA": 54
+      }
+    },
+    "test": {
+      "n": 927,
+      "focus_entities": 207,
+      "by_source": {
+        "MedQuAD": 532,
+        "openFDA-templated": 317,
+        "MedicationQA": 78
+      }
+    }
+  },
+  "passage_words_mean": 117.2,
+  "question_words_mean": 7.5
+}

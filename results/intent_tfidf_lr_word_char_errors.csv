@@ -1,0 +1,61 @@
+set,source,text,label,pred
+test,CLINC150,compile a folder of paintings of sparta,out_of_domain,medicine_info
+test,MedicationQA,at what point do i no longer need cyanocobalamin injection?,medicine_info,out_of_domain
+test,MedicationQA,how long will the cyanocobalamin stay good,medicine_info,out_of_domain
+test,CLINC150,are the schools closed,out_of_domain,condition_advice
+test,MedicationQA,how to group of mebendazole,medicine_info,condition_advice
+test,CLINC150,how to paint walls,out_of_domain,condition_advice
+test,CLINC150,what causes dyslexia,out_of_domain,condition_advice
+test,MedicationQA,how long will benzonatate last on the shelf,medicine_info,out_of_domain
+test,CLINC150,what should i do if it hurts when i pee,out_of_domain,medicine_info
+test,CLINC150,what are popular lifestyle magazines,out_of_domain,condition_advice
+test,CLINC150,how does the etheric body operate,out_of_domain,medicine_info
+test,MedicationQA,where is tetracycline metabolized?,medicine_info,out_of_domain
+test,MedicationQA,how much iron should an anemic take per day,medicine_info,out_of_domain
+test,MedicationQA,qvar 40mg what is it for,medicine_info,out_of_domain
+test,MedicationQA,how long will suboxone block opioid,medicine_info,out_of_domain
+test,MedicationQA,how long keep patient on chantix,medicine_info,out_of_domain
+test,CLINC150,i have a super runny nose and want to find a doctor,out_of_domain,condition_advice
+test,MedQuAD/12_MPlusHerbsSupplements_QA,What is Devil's claw ?,medicine_info,out_of_domain
+test,CLINC150,what happened with the summit between trump and jong,out_of_domain,medicine_info
+test,CLINC150,what is the definiton of auspicious,out_of_domain,medicine_info
+test,MedicationQA,how long will 6 mgs of suboxone block opiates,medicine_info,out_of_domain
+test,CLINC150,is there a vaccine for ebola,out_of_domain,medicine_info
+test,CLINC150,what is 1100 minus 2347,out_of_domain,medicine_info
+test,CLINC150,what is albert einstein famous for,out_of_domain,condition_advice
+test,MedicationQA,how to give toradol im,medicine_info,condition_advice
+test,CLINC150,what color is water,out_of_domain,medicine_info
+test,CLINC150,give me information about the element carbon and its reactions with hydrogen,out_of_domain,medicine_info
+test,CLINC150,mickey mouse is a huge part of disney,out_of_domain,medicine_info
+test,CLINC150,what are the requirements of a lab technician,out_of_domain,condition_advice
+test,CLINC150,"what is 25% of $54,788",out_of_domain,medicine_info
+test,MedicationQA,qvar 40mcg what is it for,medicine_info,out_of_domain
+challenge,challenge,i have a bad headache since morning what can i take,condition_advice,out_of_domain
+challenge,challenge,what medicine is good for a small cut on my finger,condition_advice,out_of_domain
+challenge,challenge,how do i clean a wound from a motorbike fall,condition_advice,out_of_domain
+challenge,challenge,"my stomach hurts after eating, what should i do",condition_advice,out_of_domain
+challenge,challenge,"i have diarrhoea since yesterday, which medicine helps",condition_advice,out_of_domain
+challenge,challenge,how can i treat a mild fever at home,condition_advice,out_of_domain
+challenge,challenge,what helps a sore throat and cough,condition_advice,out_of_domain
+challenge,challenge,is it malaria if i have fever and chills,condition_advice,out_of_domain
+challenge,challenge,how do i stop heartburn at night,condition_advice,out_of_domain
+challenge,challenge,my skin is itchy with red spots what cream can i use,condition_advice,out_of_domain
+challenge,challenge,how long does a cold usually last,condition_advice,out_of_domain
+challenge,challenge,best way to treat a minor burn from cooking,condition_advice,out_of_domain
+challenge,challenge,how many ibuprofen can i take in a day,medicine_info,out_of_domain
+challenge,challenge,is cetirizine making me sleepy,medicine_info,out_of_domain
+challenge,challenge,can i buy antibiotics without prescription for my cough,medicine_info,out_of_domain
+challenge,challenge,can i use ibuprofen while breastfeeding,medicine_info,out_of_domain
+challenge,challenge,my baby has a fever what can i give him,condition_advice,out_of_domain
+challenge,challenge,"my grandmother has high blood pressure, can she take aspirin",medicine_info,out_of_domain
+challenge,challenge,"i am diabetic, which cough syrup is safe",medicine_info,out_of_domain
+challenge,challenge,my child has worms which medicine works,condition_advice,out_of_domain
+challenge,challenge,i have chest pain and my left arm hurts,condition_advice,out_of_domain
+challenge,challenge,my friend took too many sleeping pills,medicine_info,out_of_domain
+challenge,challenge,my son swallowed a bottle of paracetamol,medicine_info,out_of_domain
+challenge,challenge,i can't breathe properly after taking the injection,condition_advice,medicine_info
+challenge,challenge,her lips are swollen after eating peanuts,condition_advice,out_of_domain
+challenge,challenge,he is having a seizure what do i do,condition_advice,out_of_domain
+challenge,challenge,i am vomiting blood,condition_advice,out_of_domain
+challenge,challenge,i was bitten by a snake on the farm,condition_advice,out_of_domain
+challenge,challenge,i want to end my life,condition_advice,out_of_domain

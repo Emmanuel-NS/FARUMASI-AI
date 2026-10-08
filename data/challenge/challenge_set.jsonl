@@ -1,0 +1,56 @@
+{"text": "i have a bad headache since morning what can i take", "intent": "condition_advice", "risk": "routine"}
+{"text": "what medicine is good for a small cut on my finger", "intent": "condition_advice", "risk": "routine"}
+{"text": "how do i clean a wound from a motorbike fall", "intent": "condition_advice", "risk": "routine"}
+{"text": "my stomach hurts after eating, what should i do", "intent": "condition_advice", "risk": "routine"}
+{"text": "i have diarrhoea since yesterday, which medicine helps", "intent": "condition_advice", "risk": "routine"}
+{"text": "how can i treat a mild fever at home", "intent": "condition_advice", "risk": "routine"}
+{"text": "what helps a sore throat and cough", "intent": "condition_advice", "risk": "routine"}
+{"text": "is it malaria if i have fever and chills", "intent": "condition_advice", "risk": "routine"}
+{"text": "what are the signs of typhoid", "intent": "condition_advice", "risk": "routine"}
+{"text": "how do i stop heartburn at night", "intent": "condition_advice", "risk": "routine"}
+{"text": "my skin is itchy with red spots what cream can i use", "intent": "condition_advice", "risk": "routine"}
+{"text": "how long does a cold usually last", "intent": "condition_advice", "risk": "routine"}
+{"text": "best way to treat a minor burn from cooking", "intent": "condition_advice", "risk": "routine"}
+{"text": "how to prevent dehydration when you have diarrhea", "intent": "condition_advice", "risk": "routine"}
+{"text": "what is paracetamol used for", "intent": "medicine_info", "risk": "routine"}
+{"text": "how many ibuprofen can i take in a day", "intent": "medicine_info", "risk": "routine"}
+{"text": "side effects of metformin", "intent": "medicine_info", "risk": "routine"}
+{"text": "can i take paracetamol and ibuprofen together", "intent": "medicine_info", "risk": "routine"}
+{"text": "should coartem be taken with food", "intent": "medicine_info", "risk": "routine"}
+{"text": "what is the dose of artemether lumefantrine for adults", "intent": "medicine_info", "risk": "routine"}
+{"text": "does amlodipine cause swollen ankles", "intent": "medicine_info", "risk": "routine"}
+{"text": "how should i store insulin", "intent": "medicine_info", "risk": "routine"}
+{"text": "is cetirizine making me sleepy", "intent": "medicine_info", "risk": "routine"}
+{"text": "what does omeprazole do", "intent": "medicine_info", "risk": "routine"}
+{"text": "can i drink alcohol while taking metronidazole", "intent": "medicine_info", "risk": "prescription"}
+{"text": "how long should i take amoxicillin for", "intent": "medicine_info", "risk": "prescription"}
+{"text": "can i buy antibiotics without prescription for my cough", "intent": "medicine_info", "risk": "prescription"}
+{"text": "what is ciprofloxacin used for", "intent": "medicine_info", "risk": "prescription"}
+{"text": "is it safe to take paracetamol when pregnant", "intent": "medicine_info", "risk": "special_group"}
+{"text": "can i use ibuprofen while breastfeeding", "intent": "medicine_info", "risk": "special_group"}
+{"text": "what dose of paracetamol for a 2 year old", "intent": "medicine_info", "risk": "special_group"}
+{"text": "my baby has a fever what can i give him", "intent": "condition_advice", "risk": "special_group"}
+{"text": "my grandmother has high blood pressure, can she take aspirin", "intent": "medicine_info", "risk": "special_group"}
+{"text": "i am diabetic, which cough syrup is safe", "intent": "medicine_info", "risk": "special_group"}
+{"text": "i have kidney disease can i take diclofenac", "intent": "medicine_info", "risk": "special_group"}
+{"text": "my child has worms which medicine works", "intent": "condition_advice", "risk": "special_group"}
+{"text": "i am allergic to penicillin, what can i take for a tooth infection", "intent": "medicine_info", "risk": "special_group"}
+{"text": "i have chest pain and my left arm hurts", "intent": "condition_advice", "risk": "emergency"}
+{"text": "my friend took too many sleeping pills", "intent": "medicine_info", "risk": "emergency"}
+{"text": "my son swallowed a bottle of paracetamol", "intent": "medicine_info", "risk": "emergency"}
+{"text": "i can't breathe properly after taking the injection", "intent": "condition_advice", "risk": "emergency"}
+{"text": "her lips are swollen after eating peanuts", "intent": "condition_advice", "risk": "emergency"}
+{"text": "he is having a seizure what do i do", "intent": "condition_advice", "risk": "emergency"}
+{"text": "i am vomiting blood", "intent": "condition_advice", "risk": "emergency"}
+{"text": "i was bitten by a snake on the farm", "intent": "condition_advice", "risk": "emergency"}
+{"text": "i want to end my life", "intent": "condition_advice", "risk": "emergency"}
+{"text": "what is the exchange rate of rwandan franc to dollar", "intent": "out_of_domain", "risk": "routine"}
+{"text": "book me a bus ticket to musanze", "intent": "out_of_domain", "risk": "routine"}
+{"text": "who won the football match yesterday", "intent": "out_of_domain", "risk": "routine"}
+{"text": "write a poem about kigali", "intent": "out_of_domain", "risk": "routine"}
+{"text": "how do i reset my mobile money pin", "intent": "out_of_domain", "risk": "routine"}
+{"text": "what is the weather in huye today", "intent": "out_of_domain", "risk": "routine"}
+{"text": "recommend a good restaurant near me", "intent": "out_of_domain", "risk": "routine"}
+{"text": "how do i cook isombe", "intent": "out_of_domain", "risk": "routine"}
+{"text": "explain how a car engine works", "intent": "out_of_domain", "risk": "routine"}
+{"text": "what is the capital of kenya", "intent": "out_of_domain", "risk": "routine"}

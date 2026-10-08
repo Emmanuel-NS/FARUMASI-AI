@@ -1,0 +1,127 @@
+set,source,text,label,pred
+test,CLINC150,what is the amount of blood needed to stay alive,out_of_domain,condition_advice
+test,CLINC150,sign me up for the writing class you told me about 2 days ago,out_of_domain,condition_advice
+test,CLINC150,explain how to reduce my debt burden,out_of_domain,condition_advice
+test,MedQuAD/10_MPlus_ADAM_QA,What is (are) Ibuprofen overdose ?,condition_advice,medicine_info
+test,CLINC150,create several photos of me with different hair styles,out_of_domain,condition_advice
+test,MedicationQA,what is nano silver?,medicine_info,condition_advice
+test,CLINC150,do i have overdraft protection,out_of_domain,condition_advice
+test,CLINC150,a hidden government facility,out_of_domain,condition_advice
+test,CLINC150,is it after noon,out_of_domain,condition_advice
+test,CLINC150,do i overspend when it comes to fast food,out_of_domain,condition_advice
+test,CLINC150,compile a folder of paintings of sparta,out_of_domain,medicine_info
+test,MedicationQA,at what point do i no longer need cyanocobalamin injection?,medicine_info,out_of_domain
+test,CLINC150,thank you for your time and trying to help,out_of_domain,condition_advice
+test,CLINC150,what are some natural remedies to help ease stress,out_of_domain,condition_advice
+test,CLINC150,what should i do if i saw a cockroach in my house,out_of_domain,condition_advice
+test,MedicationQA,how long will the cyanocobalamin stay good,medicine_info,out_of_domain
+test,CLINC150,are the schools closed,out_of_domain,condition_advice
+test,MedicationQA,how to group of mebendazole,medicine_info,condition_advice
+test,CLINC150,why is my dog vomiting after eating,out_of_domain,condition_advice
+test,CLINC150,can i get a starter course for the trumpet,out_of_domain,condition_advice
+test,CLINC150,do women still bare their chests for beads at mardi gras,out_of_domain,condition_advice
+test,CLINC150,how to paint walls,out_of_domain,condition_advice
+test,CLINC150,why did negan return to his jail cell,out_of_domain,condition_advice
+test,CLINC150,add color to the black and white photos,out_of_domain,condition_advice
+test,CLINC150,are indians nowadays reminiscent of a decade ago,out_of_domain,condition_advice
+test,CLINC150,what causes dyslexia,out_of_domain,condition_advice
+test,MedicationQA,how 9is cyanocobalamin adminitsered,medicine_info,out_of_domain
+test,CLINC150,consult the gq website to find what men wear to weddings,out_of_domain,condition_advice
+test,MedicationQA,how long will benzonatate last on the shelf,medicine_info,out_of_domain
+test,CLINC150,are there any holidays coming and when,out_of_domain,condition_advice
+test,MedQuAD/10_MPlus_ADAM_QA,Do I need to see a doctor for Depression - stopping your medicines ?,condition_advice,medicine_info
+test,CLINC150,can i sub bacon for ham,out_of_domain,condition_advice
+test,CLINC150,call my doctor,out_of_domain,condition_advice
+test,CLINC150,what should i do if it hurts when i pee,out_of_domain,condition_advice
+test,CLINC150,what are popular lifestyle magazines,out_of_domain,condition_advice
+test,CLINC150,open cnn websiteo,out_of_domain,condition_advice
+test,CLINC150,how much sugar was in my urine this morning,out_of_domain,condition_advice
+test,CLINC150,are we allowed to wash our cars during the drought,out_of_domain,condition_advice
+test,CLINC150,can i fly with my razors or are there restrictions,out_of_domain,medicine_info
+test,CLINC150,how do i skip all of the advertisements,out_of_domain,condition_advice
+test,CLINC150,what are popular sports magazines,out_of_domain,condition_advice
+test,CLINC150,how do i get rid of an itchy rash,out_of_domain,condition_advice
+test,MedQuAD/12_MPlusHerbsSupplements_QA,What is Rose Hip ?,medicine_info,condition_advice
+test,CLINC150,create a for-while loop that continues 10 times,out_of_domain,condition_advice
+test,CLINC150,can you help with delivery tracking,out_of_domain,condition_advice
+test,CLINC150,report outage to my electric provider,out_of_domain,condition_advice
+test,CLINC150,how does the etheric body operate,out_of_domain,medicine_info
+test,CLINC150,can i summon a demon using just an ouija board,out_of_domain,condition_advice
+test,CLINC150,can i plug in my electronics there like normal,out_of_domain,condition_advice
+test,CLINC150,see if there are any employment agencies hiring managers right now,out_of_domain,condition_advice
+test,CLINC150,could be,out_of_domain,condition_advice
+test,MedQuAD/10_MPlus_ADAM_QA,Do you have information about Taking multiple medicines safely,condition_advice,medicine_info
+test,CLINC150,what do i wear on my feet when it rains,out_of_domain,condition_advice
+test,CLINC150,can 401ks be moved,out_of_domain,condition_advice
+test,CLINC150,review chapter 6 with my son and verify his math homework answers,out_of_domain,condition_advice
+test,CLINC150,is there more than one occult that a person can join,out_of_domain,condition_advice
+test,MedicationQA,where is tetracycline metabolized?,medicine_info,out_of_domain
+test,MedQuAD/10_MPlus_ADAM_QA,What is (are) Depression - stopping your medicines ?,condition_advice,medicine_info
+test,CLINC150,is the stop sign around the corner still knocked over,out_of_domain,condition_advice
+test,CLINC150,get me articles and pics of different types of household bugs for this area,out_of_domain,condition_advice
+test,MedicationQA,trospium can i stop taking it?,medicine_info,condition_advice
+test,CLINC150,can i have more information about this car's highway mpg,out_of_domain,condition_advice
+test,CLINC150,thats right,out_of_domain,condition_advice
+test,CLINC150,can my grace period be extended any possible way,out_of_domain,condition_advice
+test,MedicationQA,how much iron should an anemic take per day,medicine_info,out_of_domain
+test,CLINC150,"for this design, what company did it",out_of_domain,condition_advice
+test,CLINC150,my name is going to be sherlock,out_of_domain,condition_advice
+test,CLINC150,what movie does it's just a flesh wound come from,out_of_domain,condition_advice
+test,MedicationQA,qvar 40mg what is it for,medicine_info,out_of_domain
+test,MedicationQA,how long will suboxone block opioid,medicine_info,out_of_domain
+test,CLINC150,what brand was the last advertisement for,out_of_domain,medicine_info
+test,MedicationQA,how long keep patient on chantix,medicine_info,out_of_domain
+test,CLINC150,do i need a vaccine for the congo,out_of_domain,medicine_info
+test,CLINC150,is there a better bus route i should be taking,out_of_domain,medicine_info
+test,CLINC150,do employers have to honor freedom of speech,out_of_domain,condition_advice
+test,MedicationQA,what are fat soluable vitamins.,medicine_info,condition_advice
+test,CLINC150,was einstein right to be scared of spooky action at a distance,out_of_domain,condition_advice
+test,CLINC150,what were indians like 100 years ago,out_of_domain,condition_advice
+test,CLINC150,what is a normal resting heart rate,out_of_domain,condition_advice
+test,CLINC150,where can i have a black and white photo blown up to poster size,out_of_domain,condition_advice
+test,CLINC150,has everyone come home from school,out_of_domain,condition_advice
+test,CLINC150,do we actually have a soul,out_of_domain,condition_advice
+test,CLINC150,i have a super runny nose and want to find a doctor,out_of_domain,condition_advice
+test,MedQuAD/12_MPlusHerbsSupplements_QA,What is Devil's claw ?,medicine_info,out_of_domain
+test,CLINC150,what happened with the summit between trump and jong,out_of_domain,condition_advice
+test,MedQuAD/10_MPlus_ADAM_QA,Do you have information about Alternative medicine - pain relief,condition_advice,medicine_info
+test,MedQuAD/10_MPlus_ADAM_QA,What is (are) Medicines for osteoporosis ?,condition_advice,medicine_info
+test,CLINC150,i am really not sure,out_of_domain,condition_advice
+test,CLINC150,"looking at this week only, have i overspent on hoagies",out_of_domain,condition_advice
+test,CLINC150,what is the definiton of auspicious,out_of_domain,medicine_info
+test,CLINC150,what are the highest-rated android phones,out_of_domain,condition_advice
+test,CLINC150,i appeciate it,out_of_domain,condition_advice
+test,CLINC150,how can i make my living room appear to be bigger than it is,out_of_domain,condition_advice
+test,CLINC150,what is phosphorus on the periodic table,out_of_domain,medicine_info
+test,MedicationQA,how long will 6 mgs of suboxone block opiates,medicine_info,out_of_domain
+test,CLINC150,is there a vaccine for ebola,out_of_domain,medicine_info
+test,CLINC150,what is 1100 minus 2347,out_of_domain,medicine_info
+test,CLINC150,what is albert einstein famous for,out_of_domain,medicine_info
+test,CLINC150,what is the best way for dealing with the airport,out_of_domain,condition_advice
+test,MedicationQA,how to give toradol im,medicine_info,condition_advice
+test,CLINC150,do i have a ways to go or am i close to getting to penn station,out_of_domain,condition_advice
+test,CLINC150,what did my best friend do in the kitchen while we were gone,out_of_domain,condition_advice
+test,CLINC150,what color is water,out_of_domain,medicine_info
+test,CLINC150,what are the best personal finance practices,out_of_domain,condition_advice
+test,CLINC150,give me information about the element carbon and its reactions with hydrogen,out_of_domain,condition_advice
+test,MedQuAD/10_MPlus_ADAM_QA,Do you have information about Doctor of medicine profession (MD),condition_advice,medicine_info
+test,CLINC150,find articles on essay writing for beginners,out_of_domain,condition_advice
+test,CLINC150,mickey mouse is a huge part of disney,out_of_domain,condition_advice
+test,CLINC150,what are the requirements of a lab technician,out_of_domain,condition_advice
+test,MedicationQA,qvar 40mcg what is it for,medicine_info,condition_advice
+test,MedQuAD/12_MPlusHerbsSupplements_QA,What is Palm Oil ?,medicine_info,out_of_domain
+test,CLINC150,look for a position similar to mine that is open around my area,out_of_domain,condition_advice
+test,CLINC150,please go to wikipedia and search for articles related to nsa,out_of_domain,condition_advice
+test,CLINC150,how to get the right medicine,out_of_domain,medicine_info
+challenge,challenge,what medicine is good for a small cut on my finger,condition_advice,medicine_info
+challenge,challenge,"i have diarrhoea since yesterday, which medicine helps",condition_advice,medicine_info
+challenge,challenge,how long does a cold usually last,condition_advice,out_of_domain
+challenge,challenge,does amlodipine cause swollen ankles,medicine_info,condition_advice
+challenge,challenge,is cetirizine making me sleepy,medicine_info,out_of_domain
+challenge,challenge,i have kidney disease can i take diclofenac,medicine_info,condition_advice
+challenge,challenge,my child has worms which medicine works,condition_advice,medicine_info
+challenge,challenge,"i am allergic to penicillin, what can i take for a tooth infection",medicine_info,condition_advice
+challenge,challenge,i can't breathe properly after taking the injection,condition_advice,medicine_info
+challenge,challenge,i was bitten by a snake on the farm,condition_advice,out_of_domain
+challenge,challenge,i want to end my life,condition_advice,out_of_domain
+challenge,challenge,write a poem about kigali,out_of_domain,condition_advice

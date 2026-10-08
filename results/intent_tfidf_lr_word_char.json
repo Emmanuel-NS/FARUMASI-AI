@@ -1,0 +1,143 @@
+{
+  "model": "tfidf_lr_word_char",
+  "test": {
+    "accuracy": 0.9943,
+    "macro_precision": 0.9941,
+    "macro_recall": 0.9939,
+    "macro_f1": 0.994,
+    "per_class": {
+      "medicine_info": {
+        "precision": 0.991941391941392,
+        "recall": 0.9904901243599122,
+        "f1-score": 0.9912152269399708,
+        "support": 1367.0
+      },
+      "condition_advice": {
+        "precision": 0.9956289460903351,
+        "recall": 1.0,
+        "f1-score": 0.9978096860550012,
+        "support": 2050.0
+      },
+      "out_of_domain": {
+        "precision": 0.9946157611355849,
+        "recall": 0.9912195121951219,
+        "f1-score": 0.9929147324700709,
+        "support": 2050.0
+      },
+      "accuracy": 0.9943296140479239,
+      "macro avg": {
+        "precision": 0.9940620330557707,
+        "recall": 0.9939032121850113,
+        "f1-score": 0.993979881821681,
+        "support": 5467.0
+      },
+      "weighted avg": {
+        "precision": 0.9943269677331296,
+        "recall": 0.9943296140479239,
+        "f1-score": 0.9943252740448761,
+        "support": 5467.0
+      }
+    },
+    "confusion_matrix": {
+      "labels": [
+        "medicine_info",
+        "condition_advice",
+        "out_of_domain"
+      ],
+      "matrix": [
+        [
+          1354,
+          2,
+          11
+        ],
+        [
+          0,
+          2050,
+          0
+        ],
+        [
+          11,
+          7,
+          2032
+        ]
+      ]
+    }
+  },
+  "test_accuracy_by_source": {
+    "CLINC150": 0.9912,
+    "MedQuAD/10_MPlus_ADAM_QA": 1.0,
+    "MedQuAD/11_MPlusDrugs_QA": 1.0,
+    "MedQuAD/12_MPlusHerbsSupplements_QA": 0.9821,
+    "MedQuAD/1_CancerGov_QA": 1.0,
+    "MedQuAD/4_MPlus_Health_Topics_QA": 1.0,
+    "MedQuAD/5_NIDDK_QA": 1.0,
+    "MedQuAD/6_NINDS_QA": 1.0,
+    "MedQuAD/7_SeniorHealth_QA": 1.0,
+    "MedQuAD/8_NHLBI_QA_XML": 1.0,
+    "MedQuAD/9_CDC_QA": 1.0,
+    "MedicationQA": 0.6667
+  },
+  "challenge": {
+    "accuracy": 0.4821,
+    "macro_precision": 0.7336,
+    "macro_recall": 0.5797,
+    "macro_f1": 0.4486,
+    "per_class": {
+      "medicine_info": {
+        "precision": 0.9375,
+        "recall": 0.6521739130434783,
+        "f1-score": 0.7692307692307693,
+        "support": 23.0
+      },
+      "condition_advice": {
+        "precision": 1.0,
+        "recall": 0.08695652173913043,
+        "f1-score": 0.16,
+        "support": 23.0
+      },
+      "out_of_domain": {
+        "precision": 0.2631578947368421,
+        "recall": 1.0,
+        "f1-score": 0.4166666666666667,
+        "support": 10.0
+      },
+      "accuracy": 0.48214285714285715,
+      "macro avg": {
+        "precision": 0.7335526315789473,
+        "recall": 0.5797101449275363,
+        "f1-score": 0.4486324786324787,
+        "support": 56.0
+      },
+      "weighted avg": {
+        "precision": 0.8427514097744361,
+        "recall": 0.48214285714285715,
+        "f1-score": 0.45605311355311356,
+        "support": 56.0
+      }
+    },
+    "confusion_matrix": {
+      "labels": [
+        "medicine_info",
+        "condition_advice",
+        "out_of_domain"
+      ],
+      "matrix": [
+        [
+          15,
+          0,
+          8
+        ],
+        [
+          1,
+          2,
+          20
+        ],
+        [
+          0,
+          0,
+          10
+        ]
+      ]
+    }
+  }
+}

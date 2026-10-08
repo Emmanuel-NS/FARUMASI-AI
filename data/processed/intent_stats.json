@@ -1,0 +1,26 @@
+{
+  "train": {
+    "condition_advice": 4000,
+    "medicine_info": 4000,
+    "out_of_domain": 4000
+  },
+  "val": {
+    "out_of_domain": 2148,
+    "condition_advice": 2058,
+    "medicine_info": 1432
+  },
+  "test": {
+    "out_of_domain": 2050,
+    "condition_advice": 2050,
+    "medicine_info": 1367
+  },
+  "train_consumer": {
+    "condition_advice": 6500,
+    "medicine_info": 4916,
+    "out_of_domain": 4000
+  },
+  "consumer_added": {
+    "condition_advice": 2500,
+    "medicine_info": 916
+  }
+}

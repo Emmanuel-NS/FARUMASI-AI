@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+
+# Large / regenerable data and model files (rebuilt by the pipeline, models hosted on the HF Space)
+data/raw/
+data/processed/*.jsonl
+artifacts/
+**/checkpoints/
+
+# Keep small summaries and the challenge set
+!data/processed/dataset_stats.json
+!data/processed/intent_stats.json

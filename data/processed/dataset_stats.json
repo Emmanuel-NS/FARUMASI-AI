@@ -1,45 +1,50 @@
 {
-  "corpus_passages": 8250,
+  "corpus_passages": 8840,
   "corpus_by_source": {
     "openFDA": 2049,
     "MedQuAD": 5546,
-    "MedicationQA": 655
+    "MedicationQA": 655,
+    "RwandaFDA-PIL": 590
   },
-  "qa_total": 8758,
+  "qa_total": 9518,
   "qa_by_source": {
     "MedQuAD": 5580,
     "openFDA-templated": 2523,
+    "RwandaFDA-PIL": 760,
     "MedicationQA": 655
   },
   "splits": {
     "train": {
-      "n": 7028,
-      "focus_entities": 1652,
+      "n": 7200,
+      "focus_entities": 1672,
       "by_source": {
-        "MedQuAD": 4528,
-        "openFDA-templated": 1977,
-        "MedicationQA": 523
+        "MedQuAD": 4304,
+        "openFDA-templated": 1893,
+        "MedicationQA": 511,
+        "RwandaFDA-PIL": 492
       }
     },
     "val": {
-      "n": 803,
-      "focus_entities": 207,
+      "n": 1136,
+      "focus_entities": 212,
       "by_source": {
-        "MedQuAD": 520,
-        "openFDA-templated": 229,
-        "MedicationQA": 54
+        "MedQuAD": 663,
+        "openFDA-templated": 308,
+        "RwandaFDA-PIL": 88,
+        "MedicationQA": 77
       }
     },
     "test": {
-      "n": 927,
-      "focus_entities": 207,
+      "n": 1182,
+      "focus_entities": 233,
       "by_source": {
-        "MedQuAD": 532,
-        "openFDA-templated": 317,
-        "MedicationQA": 78
+        "MedQuAD": 613,
+        "openFDA-templated": 322,
+        "RwandaFDA-PIL": 180,
+        "MedicationQA": 67
       }
     }
   },
-  "passage_words_mean": 117.2,
-  "question_words_mean": 7.5
+  "passage_words_mean": 118.2,
+  "question_words_mean": 7.4
 }

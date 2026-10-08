@@ -47,7 +47,8 @@ def main() -> None:
     gen = _load("gen_")
     if gen:
         rows = [{"system": g["system"], "context": g["context"], "n": g["n"], "ROUGE-L": g["rougeL"],
-                 "BERTScore-F1": g["bertscore_f1"], "avg words": g["avg_words"]} for g in gen]
+                 "BERTScore-F1": g["bertscore_f1"], "avg words": g["avg_words"],
+                 "Rwanda PIL ROUGE-L": g["by_source"].get("RwandaFDA-PIL", {}).get("rougeL")} for g in gen]
         lines += ["## Answer generation", "", pd.DataFrame(rows).to_markdown(index=False), ""]
 
     safety = RESULTS / "safety_eval.json"

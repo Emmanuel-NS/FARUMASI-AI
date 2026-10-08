@@ -36,15 +36,17 @@ def dense_rank(model: SentenceTransformer, corpus, questions: list[str], k: int 
     return [[ids[j] for j in row] for row in top], emb
 
 
-def finetune(epochs: float, batch: int, lr: float) -> SentenceTransformer:
+def finetune(epochs: float, batch: int, lr: float, exclude_source: str = "", out_dir=RETRIEVER_MODEL_DIR) -> SentenceTransformer:
     corpus = load_corpus()
     text = dict(zip(corpus["id"], corpus["full"]))
     tr, va = load_qa("train"), load_qa("val")
+    if exclude_source:
+        tr, va = tr[tr["source"] != exclude_source], va[va["source"] != exclude_source]
     to_ds = lambda df: Dataset.from_dict({"anchor": df["question"].tolist(), "positive": [text[g] for g in df["gold_id"]]})
 
     model = SentenceTransformer(RETRIEVER_BASE_MODEL)
     args = SentenceTransformerTrainingArguments(
-        output_dir=str(RETRIEVER_MODEL_DIR / "checkpoints"), num_train_epochs=epochs,
+        output_dir=str(out_dir / "checkpoints"), num_train_epochs=epochs,
         per_device_train_batch_size=batch, per_device_eval_batch_size=batch, learning_rate=lr,
         warmup_steps=int(0.1 * epochs * len(tr) / batch), batch_sampler=BatchSamplers.NO_DUPLICATES,  # avoid false in-batch negatives
         eval_strategy="epoch", save_strategy="no", logging_steps=50, report_to="none", seed=SEED,
@@ -54,7 +56,7 @@ def finetune(epochs: float, batch: int, lr: float) -> SentenceTransformer:
         loss=MultipleNegativesRankingLoss(model),
     )
     trainer.train()
-    model.save(str(RETRIEVER_MODEL_DIR))
+    model.save(str(out_dir))
     return model
 
 
@@ -64,24 +66,30 @@ def main() -> None:
     ap.add_argument("--epochs", type=float, default=2)
     ap.add_argument("--batch", type=int, default=64)
     ap.add_argument("--lr", type=float, default=2e-5)
+    ap.add_argument("--exclude_source", default="",
+                    help="train without this source (e.g. RwandaFDA-PIL) for the before/after experiment; "
+                         "saved separately and never replaces the deployed retriever")
     args = ap.parse_args()
 
     corpus, qa = load_corpus(), load_qa("test")
     questions = qa["question"].tolist()
+    suffix = f"_no_{args.exclude_source.split('-')[0].lower()}" if args.exclude_source else ""
 
-    if args.mode in ("zeroshot", "all"):
+    if args.mode in ("zeroshot", "all") and not suffix:
         ranked, _ = dense_rank(SentenceTransformer(RETRIEVER_BASE_MODEL), corpus, questions)
         save_retrieval("minilm_zeroshot", qa, ranked, corpus)
 
     if args.mode in ("finetune", "all"):
-        model = finetune(args.epochs, args.batch, args.lr)
+        out_dir = RETRIEVER_MODEL_DIR.with_name(RETRIEVER_MODEL_DIR.name + suffix)
+        model = finetune(args.epochs, args.batch, args.lr, args.exclude_source, out_dir)
         ranked, emb = dense_rank(model, corpus, questions, k=50)
-        np.save(CORPUS_EMB_PATH, emb.astype(np.float32))
-        save_retrieval("minilm_finetuned", qa, [r[:10] for r in ranked], corpus)
+        if not suffix:
+            np.save(CORPUS_EMB_PATH, emb.astype(np.float32))
+        save_retrieval(f"minilm_finetuned{suffix}", qa, [r[:10] for r in ranked], corpus)
 
         bm25 = BM25Retriever(corpus)
         bm = [[pid for pid, _ in bm25.search(q, 50)] for q in tqdm(questions, desc="BM25 for hybrid")]
-        save_retrieval("hybrid_rrf", qa, [rrf([d, b]) for d, b in zip(ranked, bm)], corpus)
+        save_retrieval(f"hybrid_rrf{suffix}", qa, [rrf([d, b]) for d, b in zip(ranked, bm)], corpus)
 
 
 if __name__ == "__main__":

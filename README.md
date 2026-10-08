@@ -55,6 +55,7 @@ except the small challenge set described below.
 | openFDA drug labels (US FDA) | Medicine passages (uses, dosage, warnings, side effects, ...) for 140 WHO essential medicines | 2,049 passages | Public domain |
 | MedQuAD (Ben Abacha & Demner-Fushman, 2019) | Condition QA pairs (NIH, MedlinePlus, CDC...); questions from drug subsets for intent | 5,580 QA pairs | CC BY 4.0 |
 | MedicationQA (Ben Abacha et al., 2019) | Real consumer medicine questions with trusted answers | 655 QA pairs | CC BY 4.0 |
+| Rwanda FDA Patient Information Leaflets | Patient leaflets for Rwanda-registered products (local brand names, e.g. Coartem, Coversyl, Agycin): uses, precautions, dosing, side effects, storage | 187 leaflets → 590 passages, 760 QA pairs | Public regulatory documents, cited per leaflet URL |
 | CLINC150 (Larson et al., 2019) | Out-of-domain queries for the intent classifier | 23,700 queries | CC BY 3.0 |
 | ChatDoctor-HealthCareMagic (Li et al., 2023) | Real patient questions to augment intent training (weak labels, train only) | 3,416 questions | Apache 2.0 |
 | Challenge set (`data/challenge/`) | 56 informal consumer-style questions, hand-labelled intent and risk, evaluation only | 56 | This project |
@@ -62,7 +63,16 @@ except the small challenge set described below.
 Preparation (`pharmqa/data/`): label sections are cleaned and split into ≤160-word passages;
 openFDA questions use fixed templates over the real label text (documented limitation); splits
 are **grouped by medicine/condition** so no entity appears in more than one split
-(train 7,028 / val 803 / test 927 QA pairs). See `data/processed/dataset_stats.json`.
+(train 7,445 / val 916 / test 1,157 QA pairs). See `data/processed/dataset_stats.json`.
+
+Rwanda FDA leaflets (`pharmqa/data/rwanda_pil.py`): text was extracted from the official PDFs and
+committed as `data/external/rwanda_fda_pil.jsonl.gz` (the FDA site blocks scripted downloads).
+Of 416 cached PDFs, 213 are scanned images with no text layer and were excluded (OCR was
+slow and garbled words). Leaflets are split on their standard headings (patient-leaflet and
+prescriber-style), questions are templated around the local brand name, and active-ingredient
+groups get a larger held-out share (60/10/30) so the Rwanda test set (180 questions) is big
+enough for the **before/after experiment**: retriever and reader trained with vs without the
+Rwanda leaflet questions (`--exclude_source RwandaFDA-PIL`).
 
 ## Results
 
@@ -81,17 +91,20 @@ accuracy to 79% (TF-IDF). DistilBERT results: see `results/summary.md`.
 | DistilBERT | _fill from Colab_ | |
 | DistilBERT + patient questions | _fill from Colab_ | |
 
-**Retrieval (927 test questions, 8,250 passages).**
+**Retrieval (1,157 test questions, 8,840 passages).**
 
-| Model | Recall@1 | Recall@5 | MRR@10 | Topic@1 |
-|---|---|---|---|---|
-| BM25 | 0.289 | 0.633 | 0.436 | 0.845 |
-| MiniLM zero-shot | 0.435 | 0.793 | 0.582 | |
-| MiniLM fine-tuned | _fill_ | | | |
-| Hybrid (RRF) | _fill_ | | | |
+| Model | Recall@1 | Recall@5 | MRR@10 | Topic@1 | Rwanda PIL R@1 | Rwanda PIL R@5 |
+|---|---|---|---|---|---|---|
+| BM25 | 0.323 | 0.708 | 0.480 | 0.855 | 0.444 | 0.917 |
+| MiniLM zero-shot | 0.435 | 0.805 | 0.589 | 0.882 | 0.400 | 0.783 |
+| MiniLM fine-tuned without Rwanda leaflets | _fill_ | | | | | |
+| MiniLM fine-tuned (all data) | _fill_ | | | | | |
+| Hybrid (RRF) | _fill_ | | | | | |
 
-BM25 finds the right medicine/condition 84% of the time but the right *section* only 29%:
-most errors are aspect errors (e.g. returning "side effects" for a dosage question).
+BM25 finds the right medicine/condition 85% of the time but the right *section* only 32%:
+most errors are aspect errors (e.g. returning "side effects" for a dosage question). On Rwanda
+leaflets, BM25 beats zero-shot MiniLM because local brand names (Coversyl, Biotrim) are rare
+exact-match tokens the pretrained encoder has never seen.
 
 **Answer generation (400 test questions):** see `results/summary.md`.
 
@@ -129,6 +142,7 @@ app.py               Gradio web app;  notebooks/ Colab pipeline;  results/ metri
 ## Limitations
 
 - openFDA questions are templated (answers are real); US labels use US brand names and doses.
+- Rwanda leaflet questions are also templated; some PDFs are two-column layouts whose extracted text interleaves columns, so a few passages are noisy, and half of the leaflets (scanned images) are missing.
 - MedQuAD drug answers were removed by its authors for copyright, so medicine answers come mainly from FDA labels, which are written for clinicians.
 - English only; Kinyarwanda and French questions are out of scope for this version.
 - Intent augmentation labels are heuristic; the challenge set is small and was used to refine the safety rules, so its safety score is optimistic.

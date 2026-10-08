@@ -25,6 +25,10 @@ RISK_NAMES = {"routine": "Routine", "prescription": "Prescription-only medicine"
               "special_group": "Special population", "emergency": "Possible emergency"}
 
 
+def _source_label(s: dict) -> str:
+    return f"[{s['source']}]({s['url']})" if s.get("url") else s["source"]
+
+
 def respond(message: str, history: list[dict]):
     r = assistant.answer(message)
     parts = []
@@ -43,7 +47,7 @@ def respond(message: str, history: list[dict]):
         f"generator = `{r.components['generator']}`"
     )
     sources = "\n\n".join(
-        f"**{i}. {s['title']}** ({s['source']}, similarity {s['score']})  \n{s['text'][:400]}..."
+        f"**{i}. {s['title']}** ({_source_label(s)}, similarity {s['score']})  \n{s['text'][:400]}..."
         for i, s in enumerate(r.sources, 1)
     ) or "_No passages retrieved (question was outside the pharmacy scope)._"
     return history, "", details, sources
@@ -53,8 +57,8 @@ with gr.Blocks(title="FARUMASI Pharmacist Assistant", theme=gr.themes.Soft(prima
     gr.Markdown(
         "# FARUMASI Pharmacist Assistant\n"
         "Ask about medicines (uses, dosage, side effects, interactions) or minor health problems such as "
-        "headaches, wounds or diarrhoea. Answers come from trusted sources (US FDA drug labels, NIH MedlinePlus, "
-        "MedicationQA). **This is a student research prototype and not a substitute for a pharmacist or doctor.** "
+        "headaches, wounds or diarrhoea. Answers come from trusted sources (Rwanda FDA patient information leaflets, "
+        "US FDA drug labels, NIH MedlinePlus, MedicationQA). **This is a student research prototype and not a substitute for a pharmacist or doctor.** "
         "In an emergency in Rwanda call **912**."
     )
     with gr.Row():

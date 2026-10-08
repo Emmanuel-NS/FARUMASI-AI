@@ -39,6 +39,7 @@ def main() -> None:
     ap.add_argument("--max_train", type=int, default=0, help="subsample training pairs (0 = all)")
     ap.add_argument("--max_val", type=int, default=400)
     ap.add_argument("--out", default=str(GENERATOR_ADAPTER_DIR))
+    ap.add_argument("--exclude_source", default="", help="train without this source (before/after experiment; set --out too)")
     args = ap.parse_args()
     set_seed(SEED)
 
@@ -50,6 +51,8 @@ def main() -> None:
 
     def to_ds(split: str, cap: int = 0) -> Dataset:
         df = load_qa(split)
+        if args.exclude_source:
+            df = df[df["source"] != args.exclude_source]
         if cap:
             df = df.sample(min(cap, len(df)), random_state=SEED)
         src = []

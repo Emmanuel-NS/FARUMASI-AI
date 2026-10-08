@@ -102,7 +102,8 @@ class PharmacistAssistant:
         q = self.retriever.encode([text], normalize_embeddings=True)[0]
         sims = self.emb @ q
         top = np.argsort(-sims)[:k]
-        return [{**self.corpus.iloc[i][["id", "title", "text", "source", "full"]].to_dict(), "score": float(sims[i])} for i in top]
+        cols = [c for c in ("id", "title", "text", "source", "full", "url") if c in self.corpus]
+        return [{**self.corpus.iloc[i][cols].to_dict(), "score": float(sims[i])} for i in top]
 
     @torch.no_grad()
     def generate(self, question: str, passages: list[str]) -> str:
@@ -129,5 +130,6 @@ class PharmacistAssistant:
             answer = LOW_CONFIDENCE_REPLY
         else:
             answer = self.generate(question, [h["full"] for h in hits])
-        sources = [{"title": h["title"], "source": h["source"], "score": round(h["score"], 3), "text": h["text"]} for h in hits]
+        sources = [{"title": h["title"], "source": h["source"], "score": round(h["score"], 3), "text": h["text"],
+                    "url": h.get("url") if isinstance(h.get("url"), str) else None} for h in hits]
         return Result(question, intent, conf, risk.level, answer, risk.warnings() + [safety.DISCLAIMER], sources, components)

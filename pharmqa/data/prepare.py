@@ -22,6 +22,7 @@ import pandas as pd
 from sklearn.model_selection import GroupShuffleSplit
 
 from pharmqa.config import PROCESSED, RAW, SEED
+from pharmqa.data import rwanda_pil
 
 MAX_WORDS = 160          # passage length cap (fits MiniLM / T5 context comfortably)
 CHUNKS_PER_SECTION = 2   # long label sections are split; keep the first two chunks
@@ -166,18 +167,30 @@ def main() -> None:
     build_openfda(corpus, qa, rng)
     build_medquad(corpus, qa)
     build_medicationqa(corpus, qa)
+    rwanda_pil.build(corpus, qa, rng)
 
     corpus_df = pd.DataFrame(corpus).drop_duplicates("id")
     qa_df = pd.DataFrame(qa).drop_duplicates(["question", "gold_id"])
     qa_df = qa_df[qa_df["gold_id"].isin(corpus_df["id"])].reset_index(drop=True)
 
-    # Group-aware split: 80 / 10 / 10 by focus entity.
-    outer = GroupShuffleSplit(n_splits=1, test_size=0.2, random_state=SEED)
-    train_idx, rest_idx = next(outer.split(qa_df, groups=qa_df["focus"]))
-    rest = qa_df.iloc[rest_idx]
-    inner = GroupShuffleSplit(n_splits=1, test_size=0.5, random_state=SEED)
-    val_idx, test_idx = next(inner.split(rest, groups=rest["focus"]))
-    splits = {"train": qa_df.iloc[train_idx], "val": rest.iloc[val_idx], "test": rest.iloc[test_idx]}
+    # Group-aware split by focus entity: 80/10/10 overall, but 60/10/30 for entities that have a
+    # Rwanda FDA leaflet, so the held-out Rwanda test set is large enough to measure the
+    # before/after effect of training on Rwandan leaflets.
+    rw_focus = set(qa_df.loc[qa_df["source"] == rwanda_pil.SOURCE, "focus"])
+    parts = {"train": [], "val": [], "test": []}
+    for is_rw, test_share in ((False, 0.2), (True, 0.4)):
+        sub = qa_df[qa_df["focus"].isin(rw_focus) == is_rw]
+        if sub.empty:
+            continue
+        outer = GroupShuffleSplit(n_splits=1, test_size=test_share, random_state=SEED)
+        train_idx, rest_idx = next(outer.split(sub, groups=sub["focus"]))
+        rest = sub.iloc[rest_idx]
+        inner = GroupShuffleSplit(n_splits=1, test_size=0.5 if not is_rw else 0.75, random_state=SEED)
+        val_idx, test_idx = next(inner.split(rest, groups=rest["focus"]))
+        parts["train"].append(sub.iloc[train_idx])
+        parts["val"].append(rest.iloc[val_idx])
+        parts["test"].append(rest.iloc[test_idx])
+    splits = {k: pd.concat(v) for k, v in parts.items()}
 
     corpus_df.to_json(PROCESSED / "corpus.jsonl", orient="records", lines=True, force_ascii=False)
     for name, df in splits.items():

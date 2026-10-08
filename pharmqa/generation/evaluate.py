@@ -59,12 +59,12 @@ def gold_mixed(qa: pd.DataFrame, corpus: pd.DataFrame) -> list[list[str]]:
     return out
 
 
-def load_generator(system: str):
+def load_generator(system: str, adapter: str = str(GENERATOR_ADAPTER_DIR)):
     tok = AutoTokenizer.from_pretrained(GENERATOR_BASE_MODEL)
     model = AutoModelForSeq2SeqLM.from_pretrained(GENERATOR_BASE_MODEL)
     if system == "lora":
         from peft import PeftModel
-        model = PeftModel.from_pretrained(model, str(GENERATOR_ADAPTER_DIR)).merge_and_unload()
+        model = PeftModel.from_pretrained(model, adapter).merge_and_unload()
     device = "cuda" if torch.cuda.is_available() else "cpu"
     return tok, model.to(device).eval(), device
 
@@ -84,6 +84,8 @@ def main() -> None:
     ap.add_argument("--system", required=True, choices=["extractive", "zeroshot", "lora"])
     ap.add_argument("--context", default="retrieved", choices=["gold", "retrieved"])
     ap.add_argument("--n", type=int, default=400, help="test questions to evaluate (stratified by source)")
+    ap.add_argument("--adapter", default=str(GENERATOR_ADAPTER_DIR))
+    ap.add_argument("--tag", default="", help="suffix for result files, e.g. _no_rwandafda")
     args = ap.parse_args()
 
     corpus = load_corpus()
@@ -99,7 +101,7 @@ def main() -> None:
         first = qa["gold_id"].tolist() if args.context == "gold" else [c[0] for c in ctx_ids]
         preds = [extractive_answer(text[pid]) for pid in first]
     else:
-        tok, model, device = load_generator(args.system)
+        tok, model, device = load_generator(args.system, args.adapter)
         prompts = [build_prompt(q, [text[pid] for pid in c]) for q, c in zip(qa["question"], ctx_ids)]
         preds = generate(tok, model, device, prompts)
 
@@ -110,9 +112,9 @@ def main() -> None:
                    gold_in_context=[g in c for g, c in zip(qa["gold_id"], ctx_ids)],
                    context_ids=[" | ".join(c) for c in ctx_ids])
 
-    name = f"gen_{args.system}_{args.context}"
+    name = f"gen_{args.system}_{args.context}{args.tag}"
     summary = {
-        "system": args.system, "context": args.context, "n": len(qa),
+        "system": args.system + args.tag, "context": args.context, "n": len(qa),
         "rougeL": round(float(np.mean(rouge)), 4), "bertscore_f1": round(float(np.mean(bs)), 4),
         "avg_words": round(float(np.mean([len(p.split()) for p in preds])), 1),
         "gold_in_context_rate": round(float(qa["gold_in_context"].mean()), 4),

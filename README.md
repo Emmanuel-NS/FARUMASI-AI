@@ -125,7 +125,7 @@ python -m pharmqa.generation.train_lora
 python -m pharmqa.generation.evaluate --system lora --context retrieved
 python -m pharmqa.report_tables
 python app.py                          # local web app
-python scripts/deploy_space.py --space <user>/farumasi-pharmacist-qa
+python scripts/deploy_space.py --space Emmanuel-NS/farumasi-pharmacist-qa
 ```
 
 ## Repository layout

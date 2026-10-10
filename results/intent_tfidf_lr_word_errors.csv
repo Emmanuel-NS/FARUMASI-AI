@@ -1,5 +1,4 @@
 set,source,text,label,pred
-test,CLINC150,what are the new player rankings for the nhl,out_of_domain,condition_advice
 test,CLINC150,compile a folder of paintings of sparta,out_of_domain,medicine_info
 test,MedicationQA,at what point do i no longer need cyanocobalamin injection?,medicine_info,out_of_domain
 test,MedicationQA,how long will the cyanocobalamin stay good,medicine_info,out_of_domain
@@ -20,16 +19,13 @@ test,CLINC150,what are the different types of tvs,out_of_domain,condition_advice
 test,CLINC150,what are popular sports magazines,out_of_domain,condition_advice
 test,CLINC150,how does the etheric body operate,out_of_domain,medicine_info
 test,MedicationQA,where is tetracycline metabolized?,medicine_info,out_of_domain
-test,CLINC150,show me examples of cute eyeglass frames,out_of_domain,medicine_info
 test,MedicationQA,how much iron should an anemic take per day,medicine_info,out_of_domain
-test,MedicationQA,how is tetracycline metabolized?,medicine_info,out_of_domain
 test,MedicationQA,qvar 40mg what is it for,medicine_info,out_of_domain
 test,MedicationQA,how long will suboxone block opioid,medicine_info,out_of_domain
 test,MedicationQA,how long keep patient on chantix,medicine_info,out_of_domain
 test,CLINC150,is there a better bus route i should be taking,out_of_domain,medicine_info
 test,MedicationQA,what are fat soluable vitamins.,medicine_info,condition_advice
 test,CLINC150,what happened with the summit between trump and jong,out_of_domain,medicine_info
-test,CLINC150,what are you programmed to do for me,out_of_domain,condition_advice
 test,CLINC150,what is the definiton of auspicious,out_of_domain,medicine_info
 test,MedicationQA,how long will 6 mgs of suboxone block opiates,medicine_info,out_of_domain
 test,CLINC150,is there a vaccine for ebola,out_of_domain,medicine_info
@@ -38,7 +34,6 @@ test,CLINC150,what are people saying about chick-fil-a's chicken nuggets,out_of_
 test,CLINC150,what is albert einstein famous for,out_of_domain,condition_advice
 test,MedicationQA,how to give toradol im,medicine_info,condition_advice
 test,CLINC150,what color is water,out_of_domain,medicine_info
-test,MedicationQA,how is cyanocobalamin adminitsered,medicine_info,out_of_domain
 test,CLINC150,what are the best personal finance practices,out_of_domain,condition_advice
 test,CLINC150,give me information about the element carbon and its reactions with hydrogen,out_of_domain,medicine_info
 test,CLINC150,mickey mouse is a huge part of disney,out_of_domain,medicine_info
@@ -48,7 +43,7 @@ test,MedicationQA,qvar 40mcg what is it for,medicine_info,out_of_domain
 challenge,challenge,i have a bad headache since morning what can i take,condition_advice,out_of_domain
 challenge,challenge,what medicine is good for a small cut on my finger,condition_advice,out_of_domain
 challenge,challenge,how do i clean a wound from a motorbike fall,condition_advice,out_of_domain
-challenge,challenge,"my stomach hurts after eating, what should i do",condition_advice,medicine_info
+challenge,challenge,"my stomach hurts after eating, what should i do",condition_advice,out_of_domain
 challenge,challenge,"i have diarrhoea since yesterday, which medicine helps",condition_advice,out_of_domain
 challenge,challenge,how can i treat a mild fever at home,condition_advice,out_of_domain
 challenge,challenge,what helps a sore throat and cough,condition_advice,medicine_info
@@ -67,6 +62,7 @@ challenge,challenge,can i use ibuprofen while breastfeeding,medicine_info,out_of
 challenge,challenge,my baby has a fever what can i give him,condition_advice,out_of_domain
 challenge,challenge,"my grandmother has high blood pressure, can she take aspirin",medicine_info,out_of_domain
 challenge,challenge,"i am diabetic, which cough syrup is safe",medicine_info,out_of_domain
+challenge,challenge,i have kidney disease can i take diclofenac,medicine_info,out_of_domain
 challenge,challenge,my child has worms which medicine works,condition_advice,out_of_domain
 challenge,challenge,"i am allergic to penicillin, what can i take for a tooth infection",medicine_info,out_of_domain
 challenge,challenge,i have chest pain and my left arm hurts,condition_advice,out_of_domain

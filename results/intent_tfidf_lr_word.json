@@ -1,40 +1,40 @@
 {
   "model": "tfidf_lr_word",
   "test": {
-    "accuracy": 0.9916,
-    "macro_precision": 0.9914,
-    "macro_recall": 0.991,
-    "macro_f1": 0.9912,
+    "accuracy": 0.9925,
+    "macro_precision": 0.9923,
+    "macro_recall": 0.992,
+    "macro_f1": 0.9921,
     "per_class": {
       "medicine_info": {
-        "precision": 0.9897209985315712,
-        "recall": 0.986100950987564,
-        "f1-score": 0.9879076584829608,
+        "precision": 0.9904622157006603,
+        "recall": 0.9875640087783467,
+        "f1-score": 0.989010989010989,
         "support": 1367.0
       },
       "condition_advice": {
-        "precision": 0.9922555663117134,
+        "precision": 0.9932170542635659,
         "recall": 1.0,
-        "f1-score": 0.9961127308066083,
+        "f1-score": 0.9965969859017987,
         "support": 2050.0
       },
       "out_of_domain": {
-        "precision": 0.9921530161844041,
-        "recall": 0.9868292682926829,
-        "f1-score": 0.9894839814135485,
+        "precision": 0.9931372549019608,
+        "recall": 0.9882926829268293,
+        "f1-score": 0.9907090464547678,
         "support": 2050.0
       },
-      "accuracy": 0.9915858789098225,
+      "accuracy": 0.9925004572891897,
       "macro avg": {
-        "precision": 0.9913765270092295,
-        "recall": 0.9909767397600824,
-        "f1-score": 0.9911681235677059,
+        "precision": 0.9922721749553957,
+        "recall": 0.991952230568392,
+        "f1-score": 0.9921056737891852,
         "support": 5467.0
       },
       "weighted avg": {
-        "precision": 0.9915833545106455,
-        "recall": 0.9915858789098225,
-        "f1-score": 0.9915754580569837,
+        "precision": 0.9924982957110174,
+        "recall": 0.9925004572891897,
+        "f1-score": 0.9924922971115755,
         "support": 5467.0
       }
     },
@@ -46,9 +46,9 @@
       ],
       "matrix": [
         [
-          1348,
+          1350,
           3,
-          16
+          14
         ],
         [
           0,
@@ -56,15 +56,15 @@
           0
         ],
         [
-          14,
           13,
-          2023
+          11,
+          2026
         ]
       ]
     }
   },
   "test_accuracy_by_source": {
-    "CLINC150": 0.9868,
+    "CLINC150": 0.9883,
     "MedQuAD/10_MPlus_ADAM_QA": 1.0,
     "MedQuAD/11_MPlusDrugs_QA": 1.0,
     "MedQuAD/12_MPlusHerbsSupplements_QA": 1.0,
@@ -75,18 +75,18 @@
     "MedQuAD/7_SeniorHealth_QA": 1.0,
     "MedQuAD/8_NHLBI_QA_XML": 1.0,
     "MedQuAD/9_CDC_QA": 1.0,
-    "MedicationQA": 0.4722
+    "MedicationQA": 0.5278
   },
   "challenge": {
-    "accuracy": 0.4107,
-    "macro_precision": 0.6786,
-    "macro_recall": 0.5217,
-    "macro_f1": 0.3849,
+    "accuracy": 0.3929,
+    "macro_precision": 0.6905,
+    "macro_recall": 0.5072,
+    "macro_f1": 0.372,
     "per_class": {
       "medicine_info": {
-        "precision": 0.7857142857142857,
-        "recall": 0.4782608695652174,
-        "f1-score": 0.5945945945945946,
+        "precision": 0.8333333333333334,
+        "recall": 0.43478260869565216,
+        "f1-score": 0.5714285714285714,
         "support": 23.0
       },
       "condition_advice": {
@@ -96,22 +96,22 @@
         "support": 23.0
       },
       "out_of_domain": {
-        "precision": 0.25,
+        "precision": 0.23809523809523808,
         "recall": 1.0,
-        "f1-score": 0.4,
+        "f1-score": 0.38461538461538464,
         "support": 10.0
       },
-      "accuracy": 0.4107142857142857,
+      "accuracy": 0.39285714285714285,
       "macro avg": {
-        "precision": 0.6785714285714285,
-        "recall": 0.5217391304347826,
-        "f1-score": 0.38486486486486493,
+        "precision": 0.6904761904761906,
+        "recall": 0.5072463768115942,
+        "f1-score": 0.37201465201465206,
         "support": 56.0
       },
       "weighted avg": {
-        "precision": 0.7780612244897959,
-        "recall": 0.4107142857142857,
-        "f1-score": 0.3813513513513514,
+        "precision": 0.7954931972789117,
+        "recall": 0.39285714285714285,
+        "f1-score": 0.3690894819466248,
         "support": 56.0
       }
     },
@@ -123,14 +123,14 @@
       ],
       "matrix": [
         [
-          11,
+          10,
           0,
-          12
+          13
         ],
         [
-          3,
           2,
-          18
+          2,
+          19
         ],
         [
           0,

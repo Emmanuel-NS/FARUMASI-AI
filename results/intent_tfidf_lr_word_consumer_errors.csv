@@ -5,6 +5,7 @@ test,CLINC150,my tires are 29 months old should u change them,out_of_domain,cond
 test,CLINC150,explain how to reduce my debt burden,out_of_domain,condition_advice
 test,CLINC150,do you have any ideas for a mexican meal,out_of_domain,condition_advice
 test,CLINC150,create several photos of me with different hair styles,out_of_domain,condition_advice
+test,MedQuAD/10_MPlus_ADAM_QA,What is (are) Depression - stopping your medicines ?,condition_advice,medicine_info
 test,CLINC150,do i have overdraft protection,out_of_domain,condition_advice
 test,CLINC150,is it after noon,out_of_domain,condition_advice
 test,CLINC150,do i overspend when it comes to fast food,out_of_domain,condition_advice
@@ -22,7 +23,6 @@ test,CLINC150,are the schools closed,out_of_domain,condition_advice
 test,CLINC150,please give me a listing of all the bottled water brands in the area,out_of_domain,condition_advice
 test,MedicationQA,how to group of mebendazole,medicine_info,condition_advice
 test,CLINC150,why is my dog vomiting after eating,out_of_domain,medicine_info
-test,CLINC150,do women still bare their chests for beads at mardi gras,out_of_domain,condition_advice
 test,CLINC150,how to paint walls,out_of_domain,condition_advice
 test,CLINC150,why did negan return to his jail cell,out_of_domain,condition_advice
 test,MedicationQA,why am i so cold taking bystolic b p med,medicine_info,condition_advice
@@ -34,13 +34,17 @@ test,MedicationQA,how long will benzonatate last on the shelf,medicine_info,out_
 test,CLINC150,are there any holidays coming and when,out_of_domain,condition_advice
 test,CLINC150,what should i do if it hurts when i pee,out_of_domain,condition_advice
 test,CLINC150,what are popular lifestyle magazines,out_of_domain,condition_advice
+test,CLINC150,how much sugar was in my urine this morning,out_of_domain,condition_advice
+test,CLINC150,how do i learn more about linguistics,out_of_domain,medicine_info
 test,CLINC150,am i almost due for a tire change,out_of_domain,condition_advice
 test,CLINC150,can i fly with my razors or are there restrictions,out_of_domain,condition_advice
 test,MedicationQA,how reduce cholesterol,medicine_info,out_of_domain
 test,CLINC150,what are the different types of tvs,out_of_domain,condition_advice
 test,CLINC150,what are popular sports magazines,out_of_domain,condition_advice
 test,CLINC150,how do i get rid of an itchy rash,out_of_domain,condition_advice
+test,CLINC150,are all the street lamps working on my street,out_of_domain,condition_advice
 test,CLINC150,create a for-while loop that continues 10 times,out_of_domain,condition_advice
+test,CLINC150,be quiet,out_of_domain,condition_advice
 test,CLINC150,can you help with delivery tracking,out_of_domain,condition_advice
 test,CLINC150,what to use to design my business cards,out_of_domain,condition_advice
 test,CLINC150,how does the etheric body operate,out_of_domain,medicine_info
@@ -56,7 +60,6 @@ test,CLINC150,is there more than one occult that a person can join,out_of_domain
 test,CLINC150,are all televisions high definition,out_of_domain,condition_advice
 test,MedicationQA,where is tetracycline metabolized?,medicine_info,condition_advice
 test,CLINC150,can i ask your age,out_of_domain,condition_advice
-test,MedQuAD/10_MPlus_ADAM_QA,What is (are) Depression - stopping your medicines ?,condition_advice,medicine_info
 test,CLINC150,is the stop sign around the corner still knocked over,out_of_domain,condition_advice
 test,CLINC150,get me articles and pics of different types of household bugs for this area,out_of_domain,condition_advice
 test,CLINC150,show me examples of cute eyeglass frames,out_of_domain,medicine_info
@@ -70,9 +73,9 @@ test,CLINC150,what movie does it's just a flesh wound come from,out_of_domain,co
 test,CLINC150,please lower the sound,out_of_domain,condition_advice
 test,MedicationQA,qvar 40mg what is it for,medicine_info,condition_advice
 test,MedicationQA,how long will suboxone block opioid,medicine_info,out_of_domain
-test,CLINC150,can you see if the octopus eggs have hatched yet,out_of_domain,condition_advice
 test,CLINC150,where is te lawrence,out_of_domain,condition_advice
 test,MedicationQA,how long keep patient on chantix,medicine_info,out_of_domain
+test,CLINC150,do i need a vaccine for the congo,out_of_domain,medicine_info
 test,CLINC150,is it possible i have a meeting with kim today,out_of_domain,condition_advice
 test,CLINC150,what do i have planned for 3/5,out_of_domain,condition_advice
 test,CLINC150,is there a better bus route i should be taking,out_of_domain,medicine_info
@@ -93,6 +96,7 @@ test,CLINC150,what company designed this,out_of_domain,condition_advice
 test,CLINC150,"looking at this week only, have i overspent on hoagies",out_of_domain,condition_advice
 test,CLINC150,what is the definiton of auspicious,out_of_domain,medicine_info
 test,CLINC150,what kind of glue is used for gluing pipes together,out_of_domain,medicine_info
+test,CLINC150,what is the cost of my rent and water bills,out_of_domain,condition_advice
 test,CLINC150,are there any messages,out_of_domain,medicine_info
 test,CLINC150,i appeciate it,out_of_domain,condition_advice
 test,CLINC150,how can i make my living room appear to be bigger than it is,out_of_domain,condition_advice
@@ -109,12 +113,12 @@ test,MedicationQA,how is cyanocobalamin adminitsered,medicine_info,out_of_domain
 test,CLINC150,what are the best personal finance practices,out_of_domain,condition_advice
 test,CLINC150,organize photos by year they were taken,out_of_domain,condition_advice
 test,CLINC150,give me information about the element carbon and its reactions with hydrogen,out_of_domain,condition_advice
+test,CLINC150,what makes pi so mathematically important,out_of_domain,condition_advice
 test,CLINC150,mickey mouse is a huge part of disney,out_of_domain,condition_advice
 test,CLINC150,what are the requirements of a lab technician,out_of_domain,condition_advice
 test,CLINC150,"what is 25% of $54,788",out_of_domain,medicine_info
 test,MedicationQA,qvar 40mcg what is it for,medicine_info,condition_advice
 test,MedQuAD/12_MPlusHerbsSupplements_QA,What is Palm Oil ?,medicine_info,out_of_domain
-test,CLINC150,look for a position similar to mine that is open around my area,out_of_domain,condition_advice
 test,CLINC150,please go to wikipedia and search for articles related to nsa,out_of_domain,condition_advice
 test,CLINC150,find out what type of wax is needed for a late model ford sedan,out_of_domain,condition_advice
 test,CLINC150,how to get the right medicine,out_of_domain,medicine_info

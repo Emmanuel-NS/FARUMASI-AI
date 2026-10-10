@@ -1,0 +1,35 @@
+{
+  "recall@1": 0.5508,
+  "recall@3": 0.7902,
+  "recall@5": 0.8672,
+  "recall@10": 0.9433,
+  "mrr@10": 0.6841,
+  "by_source": {
+    "MedQuAD": {
+      "n": 613,
+      "recall@1": 0.5383,
+      "recall@5": 0.8646,
+      "mrr@10": 0.6735
+    },
+    "MedicationQA": {
+      "n": 67,
+      "recall@1": 0.6418,
+      "recall@5": 0.8806,
+      "mrr@10": 0.7434
+    },
+    "RwandaFDA-PIL": {
+      "n": 180,
+      "recall@1": 0.6889,
+      "recall@5": 0.9667,
+      "mrr@10": 0.8103
+    },
+    "openFDA-templated": {
+      "n": 322,
+      "recall@1": 0.4783,
+      "recall@5": 0.8137,
+      "mrr@10": 0.6212
+    }
+  },
+  "topic@1": 0.9509,
+  "model": "hybrid_rrf"
+}

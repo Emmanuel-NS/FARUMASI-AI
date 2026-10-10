@@ -1,0 +1,37 @@
+set,source,text,label,pred
+test,CLINC150,what causes dyslexia,out_of_domain,condition_advice
+test,CLINC150,how much is alorie intake,out_of_domain,medicine_info
+test,CLINC150,how much are the clorox detergents,out_of_domain,medicine_info
+test,MedQuAD/6_NINDS_QA,what research (or clinical trials) is being done for CADASIL ?,condition_advice,medicine_info
+test,CLINC150,how does the etheric body operate,out_of_domain,medicine_info
+test,CLINC150,when does napa close,out_of_domain,medicine_info
+test,MedicationQA,qvar 40mcg what is it doe,medicine_info,out_of_domain
+test,MedicationQA,how long keep patient on chantix,medicine_info,out_of_domain
+test,MedicationQA,qvar 40mcg what is it for,medicine_info,out_of_domain
+test,MedQuAD/10_MPlus_ADAM_QA,"What is (are) MMR (measles, mumps,and rubella) vaccine - what you need to know ?",condition_advice,medicine_info
+test,CLINC150,include asparagus on the list,out_of_domain,medicine_info
+challenge,challenge,i have a bad headache since morning what can i take,condition_advice,out_of_domain
+challenge,challenge,what medicine is good for a small cut on my finger,condition_advice,out_of_domain
+challenge,challenge,how do i clean a wound from a motorbike fall,condition_advice,out_of_domain
+challenge,challenge,"my stomach hurts after eating, what should i do",condition_advice,out_of_domain
+challenge,challenge,"i have diarrhoea since yesterday, which medicine helps",condition_advice,out_of_domain
+challenge,challenge,how can i treat a mild fever at home,condition_advice,out_of_domain
+challenge,challenge,what helps a sore throat and cough,condition_advice,out_of_domain
+challenge,challenge,is it malaria if i have fever and chills,condition_advice,out_of_domain
+challenge,challenge,what are the signs of typhoid,condition_advice,out_of_domain
+challenge,challenge,how do i stop heartburn at night,condition_advice,out_of_domain
+challenge,challenge,my skin is itchy with red spots what cream can i use,condition_advice,out_of_domain
+challenge,challenge,how long does a cold usually last,condition_advice,out_of_domain
+challenge,challenge,best way to treat a minor burn from cooking,condition_advice,out_of_domain
+challenge,challenge,can i buy antibiotics without prescription for my cough,medicine_info,out_of_domain
+challenge,challenge,my baby has a fever what can i give him,condition_advice,out_of_domain
+challenge,challenge,"i am diabetic, which cough syrup is safe",medicine_info,out_of_domain
+challenge,challenge,my child has worms which medicine works,condition_advice,out_of_domain
+challenge,challenge,i have chest pain and my left arm hurts,condition_advice,out_of_domain
+challenge,challenge,my friend took too many sleeping pills,medicine_info,out_of_domain
+challenge,challenge,i can't breathe properly after taking the injection,condition_advice,out_of_domain
+challenge,challenge,her lips are swollen after eating peanuts,condition_advice,out_of_domain
+challenge,challenge,he is having a seizure what do i do,condition_advice,out_of_domain
+challenge,challenge,i am vomiting blood,condition_advice,out_of_domain
+challenge,challenge,i was bitten by a snake on the farm,condition_advice,out_of_domain
+challenge,challenge,i want to end my life,condition_advice,out_of_domain

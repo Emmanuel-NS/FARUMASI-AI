@@ -1,15 +1,15 @@
 {
   "model": "tfidf_lr_word_char_consumer",
   "test": {
-    "accuracy": 0.9791,
-    "macro_precision": 0.9802,
-    "macro_recall": 0.9799,
-    "macro_f1": 0.9799,
+    "accuracy": 0.979,
+    "macro_precision": 0.98,
+    "macro_recall": 0.9798,
+    "macro_f1": 0.9797,
     "per_class": {
       "medicine_info": {
-        "precision": 0.9853801169590644,
+        "precision": 0.9846603360116873,
         "recall": 0.986100950987564,
-        "f1-score": 0.9857404021937842,
+        "f1-score": 0.9853801169590644,
         "support": 1367.0
       },
       "condition_advice": {
@@ -19,22 +19,22 @@
         "support": 2050.0
       },
       "out_of_domain": {
-        "precision": 0.993920972644377,
-        "recall": 0.9570731707317073,
-        "f1-score": 0.9751491053677932,
+        "precision": 0.9939178915357324,
+        "recall": 0.9565853658536585,
+        "f1-score": 0.974894357444693,
         "support": 2050.0
       },
-      "accuracy": 0.9791476129504298,
+      "accuracy": 0.9789646972745565,
       "macro avg": {
-        "precision": 0.9802376181031077,
-        "recall": 0.9799198291909766,
-        "f1-score": 0.9798573807640388,
+        "precision": 0.979996664084434,
+        "recall": 0.9797572275649603,
+        "f1-score": 0.979652369711432,
         "support": 5467.0
       },
       "weighted avg": {
-        "precision": 0.9795951584874835,
-        "recall": 0.9791476129504298,
-        "f1-score": 0.9791224066216361,
+        "precision": 0.9794140249905408,
+        "recall": 0.9789646972745565,
+        "f1-score": 0.9789367941910128,
         "support": 5467.0
       }
     },
@@ -56,15 +56,15 @@
           0
         ],
         [
-          13,
+          14,
           75,
-          1962
+          1961
         ]
       ]
     }
   },
   "test_accuracy_by_source": {
-    "CLINC150": 0.9571,
+    "CLINC150": 0.9566,
     "MedQuAD/10_MPlus_ADAM_QA": 0.9956,
     "MedQuAD/11_MPlusDrugs_QA": 1.0,
     "MedQuAD/12_MPlusHerbsSupplements_QA": 0.9464,
@@ -78,10 +78,10 @@
     "MedicationQA": 0.5556
   },
   "challenge": {
-    "accuracy": 0.7857,
-    "macro_precision": 0.7728,
-    "macro_recall": 0.8072,
-    "macro_f1": 0.7843,
+    "accuracy": 0.7679,
+    "macro_precision": 0.7528,
+    "macro_recall": 0.7928,
+    "macro_f1": 0.7635,
     "per_class": {
       "medicine_info": {
         "precision": 0.8260869565217391,
@@ -90,28 +90,28 @@
         "support": 23.0
       },
       "condition_advice": {
-        "precision": 0.8,
-        "recall": 0.6956521739130435,
-        "f1-score": 0.7441860465116279,
+        "precision": 0.7894736842105263,
+        "recall": 0.6521739130434783,
+        "f1-score": 0.7142857142857143,
         "support": 23.0
       },
       "out_of_domain": {
-        "precision": 0.6923076923076923,
+        "precision": 0.6428571428571429,
         "recall": 0.9,
-        "f1-score": 0.782608695652174,
+        "f1-score": 0.75,
         "support": 10.0
       },
-      "accuracy": 0.7857142857142857,
+      "accuracy": 0.7678571428571429,
       "macro avg": {
-        "precision": 0.7727982162764772,
-        "recall": 0.8072463768115942,
-        "f1-score": 0.784293899561847,
+        "precision": 0.752805927863136,
+        "recall": 0.7927536231884057,
+        "f1-score": 0.7634575569358178,
         "support": 56.0
       },
       "weighted avg": {
-        "precision": 0.7914835164835166,
-        "recall": 0.7857142857142857,
-        "f1-score": 0.7846851076123069,
+        "precision": 0.7783297529538132,
+        "recall": 0.7678571428571429,
+        "f1-score": 0.7665816326530612,
         "support": 56.0
       }
     },
@@ -129,8 +129,8 @@
         ],
         [
           4,
-          16,
-          3
+          15,
+          4
         ],
         [
           0,

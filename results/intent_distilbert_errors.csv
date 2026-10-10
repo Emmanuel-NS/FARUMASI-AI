@@ -1,0 +1,44 @@
+set,source,text,label,pred
+test,MedQuAD/10_MPlus_ADAM_QA,What is (are) Medicines for osteoporosis ?,condition_advice,medicine_info
+test,MedQuAD/10_MPlus_ADAM_QA,What is (are) Depression - stopping your medicines ?,condition_advice,medicine_info
+test,MedQuAD/10_MPlus_ADAM_QA,Do I need to see a doctor for Neuropathy secondary to drugs ?,condition_advice,medicine_info
+test,CLINC150,what are some natural remedies to help ease stress,out_of_domain,condition_advice
+test,MedQuAD/10_MPlus_ADAM_QA,How to prevent Neuropathy secondary to drugs ?,condition_advice,medicine_info
+test,CLINC150,what causes dyslexia,out_of_domain,condition_advice
+test,MedQuAD/10_MPlus_ADAM_QA,What causes Neuropathy secondary to drugs ?,condition_advice,medicine_info
+test,CLINC150,how much is alorie intake,out_of_domain,medicine_info
+test,MedQuAD/10_MPlus_ADAM_QA,What is (are) Asthma - control drugs ?,condition_advice,medicine_info
+test,MedQuAD/6_NINDS_QA,what research (or clinical trials) is being done for CADASIL ?,condition_advice,medicine_info
+test,CLINC150,how do i get rid of an itchy rash,out_of_domain,condition_advice
+test,MedicationQA,qvar 40mcg what is it doe,medicine_info,out_of_domain
+test,MedQuAD/10_MPlus_ADAM_QA,What are the complications of Neuropathy secondary to drugs ?,condition_advice,medicine_info
+test,MedQuAD/10_MPlus_ADAM_QA,What is (are) Asthma - quick-relief drugs ?,condition_advice,medicine_info
+test,MedicationQA,trospium can i stop taking it?,medicine_info,condition_advice
+test,MedicationQA,how long keep patient on chantix,medicine_info,out_of_domain
+test,CLINC150,what is a normal resting heart rate,out_of_domain,condition_advice
+test,MedQuAD/10_MPlus_ADAM_QA,Do I need to see a doctor for Depression - stopping your medicines ?,condition_advice,medicine_info
+test,CLINC150,i have a super runny nose and want to find a doctor,out_of_domain,condition_advice
+test,MedQuAD/12_MPlusHerbsSupplements_QA,What is Devil's claw ?,medicine_info,condition_advice
+test,CLINC150,how many ppm of particulate is in my local water,out_of_domain,medicine_info
+test,MedQuAD/10_MPlus_ADAM_QA,How to diagnose Neuropathy secondary to drugs ?,condition_advice,medicine_info
+test,CLINC150,is there a vaccine for ebola,out_of_domain,medicine_info
+test,MedQuAD/10_MPlus_ADAM_QA,What are the symptoms of Neuropathy secondary to drugs ?,condition_advice,medicine_info
+test,CLINC150,give me information about the element carbon and its reactions with hydrogen,out_of_domain,condition_advice
+test,MedQuAD/10_MPlus_ADAM_QA,What is (are) Drugs that may cause impotence ?,condition_advice,medicine_info
+test,CLINC150,tell me nutritional info for brocoli,out_of_domain,medicine_info
+test,CLINC150,what makes pi so mathematically important,out_of_domain,medicine_info
+test,CLINC150,tell me what my current eyeglasses prescription is,out_of_domain,medicine_info
+test,MedicationQA,qvar 40mcg what is it for,medicine_info,out_of_domain
+test,MedQuAD/10_MPlus_ADAM_QA,What is (are) Neuropathy secondary to drugs ?,condition_advice,medicine_info
+test,CLINC150,how to get the right medicine,out_of_domain,medicine_info
+challenge,challenge,what medicine is good for a small cut on my finger,condition_advice,medicine_info
+challenge,challenge,how do i clean a wound from a motorbike fall,condition_advice,out_of_domain
+challenge,challenge,"i have diarrhoea since yesterday, which medicine helps",condition_advice,medicine_info
+challenge,challenge,how can i treat a mild fever at home,condition_advice,out_of_domain
+challenge,challenge,how do i stop heartburn at night,condition_advice,out_of_domain
+challenge,challenge,how long does a cold usually last,condition_advice,out_of_domain
+challenge,challenge,best way to treat a minor burn from cooking,condition_advice,out_of_domain
+challenge,challenge,my child has worms which medicine works,condition_advice,medicine_info
+challenge,challenge,i can't breathe properly after taking the injection,condition_advice,medicine_info
+challenge,challenge,i was bitten by a snake on the farm,condition_advice,out_of_domain
+challenge,challenge,i want to end my life,condition_advice,out_of_domain

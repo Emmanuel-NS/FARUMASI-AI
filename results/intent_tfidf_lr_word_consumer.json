@@ -1,40 +1,40 @@
 {
   "model": "tfidf_lr_word_consumer",
   "test": {
-    "accuracy": 0.9782,
-    "macro_precision": 0.9797,
-    "macro_recall": 0.9791,
-    "macro_f1": 0.9791,
+    "accuracy": 0.9775,
+    "macro_precision": 0.9789,
+    "macro_recall": 0.9785,
+    "macro_f1": 0.9784,
     "per_class": {
       "medicine_info": {
-        "precision": 0.986822840409956,
+        "precision": 0.9853801169590644,
         "recall": 0.986100950987564,
-        "f1-score": 0.9864617636297109,
+        "f1-score": 0.9857404021937842,
         "support": 1367.0
       },
       "condition_advice": {
-        "precision": 0.9579242636746143,
+        "precision": 0.9570294255021018,
         "recall": 0.9995121951219512,
-        "f1-score": 0.9782764382907615,
+        "f1-score": 0.9778095919828204,
         "support": 2050.0
       },
       "out_of_domain": {
-        "precision": 0.9943934760448522,
-        "recall": 0.9517073170731707,
-        "f1-score": 0.9725822532402791,
+        "precision": 0.9943820224719101,
+        "recall": 0.9497560975609756,
+        "f1-score": 0.9715568862275449,
         "support": 2050.0
       },
-      "accuracy": 0.9782330345710627,
+      "accuracy": 0.977501371867569,
       "macro avg": {
-        "precision": 0.9797135267098075,
-        "recall": 0.9791068210608952,
-        "f1-score": 0.9791068183869172,
+        "precision": 0.9789305216443588,
+        "recall": 0.9784564145568302,
+        "f1-score": 0.9783689601347164,
         "support": 5467.0
       },
       "weighted avg": {
-        "precision": 0.978825350149134,
-        "recall": 0.9782330345710627,
-        "f1-score": 0.9781879547321105,
+        "precision": 0.9781247646295529,
+        "recall": 0.977501371867569,
+        "f1-score": 0.9774480355094479,
         "support": 5467.0
       }
     },
@@ -56,15 +56,15 @@
           0
         ],
         [
-          17,
-          82,
-          1951
+          19,
+          84,
+          1947
         ]
       ]
     }
   },
   "test_accuracy_by_source": {
-    "CLINC150": 0.9517,
+    "CLINC150": 0.9498,
     "MedQuAD/10_MPlus_ADAM_QA": 0.9994,
     "MedQuAD/11_MPlusDrugs_QA": 1.0,
     "MedQuAD/12_MPlusHerbsSupplements_QA": 0.9821,

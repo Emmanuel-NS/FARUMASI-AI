@@ -2,21 +2,19 @@ set,source,text,label,pred
 test,CLINC150,compile a folder of paintings of sparta,out_of_domain,medicine_info
 test,MedicationQA,at what point do i no longer need cyanocobalamin injection?,medicine_info,out_of_domain
 test,MedicationQA,how long will the cyanocobalamin stay good,medicine_info,out_of_domain
-test,CLINC150,are the schools closed,out_of_domain,condition_advice
-test,MedicationQA,how to group of mebendazole,medicine_info,condition_advice
 test,CLINC150,how to paint walls,out_of_domain,condition_advice
 test,CLINC150,what causes dyslexia,out_of_domain,condition_advice
+test,MedicationQA,how 9is cyanocobalamin adminitsered,medicine_info,out_of_domain
 test,MedicationQA,how long will benzonatate last on the shelf,medicine_info,out_of_domain
 test,CLINC150,what should i do if it hurts when i pee,out_of_domain,medicine_info
 test,CLINC150,what are popular lifestyle magazines,out_of_domain,condition_advice
+test,CLINC150,how do i learn more about linguistics,out_of_domain,medicine_info
+test,CLINC150,what are popular sports magazines,out_of_domain,condition_advice
 test,CLINC150,how does the etheric body operate,out_of_domain,medicine_info
 test,MedicationQA,where is tetracycline metabolized?,medicine_info,out_of_domain
-test,MedicationQA,how much iron should an anemic take per day,medicine_info,out_of_domain
 test,MedicationQA,qvar 40mg what is it for,medicine_info,out_of_domain
 test,MedicationQA,how long will suboxone block opioid,medicine_info,out_of_domain
 test,MedicationQA,how long keep patient on chantix,medicine_info,out_of_domain
-test,CLINC150,i have a super runny nose and want to find a doctor,out_of_domain,condition_advice
-test,MedQuAD/12_MPlusHerbsSupplements_QA,What is Devil's claw ?,medicine_info,out_of_domain
 test,CLINC150,what happened with the summit between trump and jong,out_of_domain,medicine_info
 test,CLINC150,what is the definiton of auspicious,out_of_domain,medicine_info
 test,MedicationQA,how long will 6 mgs of suboxone block opiates,medicine_info,out_of_domain
@@ -38,6 +36,7 @@ challenge,challenge,"i have diarrhoea since yesterday, which medicine helps",con
 challenge,challenge,how can i treat a mild fever at home,condition_advice,out_of_domain
 challenge,challenge,what helps a sore throat and cough,condition_advice,out_of_domain
 challenge,challenge,is it malaria if i have fever and chills,condition_advice,out_of_domain
+challenge,challenge,what are the signs of typhoid,condition_advice,out_of_domain
 challenge,challenge,how do i stop heartburn at night,condition_advice,out_of_domain
 challenge,challenge,my skin is itchy with red spots what cream can i use,condition_advice,out_of_domain
 challenge,challenge,how long does a cold usually last,condition_advice,out_of_domain

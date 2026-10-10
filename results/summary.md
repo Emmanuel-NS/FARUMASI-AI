@@ -59,6 +59,15 @@
 | minilm_zeroshot               | RwandaFDA-PIL     | 180 |     0.4    |     0.7833 |   0.5531 |
 | minilm_zeroshot               | openFDA-templated | 322 |     0.323  |     0.7391 |   0.4988 |
 
+## Answer generation
+
+| system     | context   |   n |   ROUGE-L |   BERTScore-F1 |   avg words |   Rwanda PIL ROUGE-L |
+|:-----------|:----------|----:|----------:|---------------:|------------:|---------------------:|
+| extractive | gold      | 400 |    0.9329 |         0.9853 |        60.5 |               0.7693 |
+| extractive | retrieved | 400 |    0.7109 |         0.9227 |        56.4 |               0.5757 |
+| zeroshot   | gold      | 400 |    0.1899 |         0.76   |         9   |               0.1561 |
+| zeroshot   | retrieved | 400 |    0.1889 |         0.7617 |         9   |               0.1424 |
+
 ## Safety risk detector (challenge set)
 
 Accuracy: 1.0

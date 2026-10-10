@@ -63,6 +63,8 @@ def load_generator(system: str, adapter: str = str(GENERATOR_ADAPTER_DIR)):
     tok = AutoTokenizer.from_pretrained(GENERATOR_BASE_MODEL)
     model = AutoModelForSeq2SeqLM.from_pretrained(GENERATOR_BASE_MODEL)
     if system == "lora":
+        from pharmqa.compat import hide_incompatible_torchao
+        hide_incompatible_torchao()
         from peft import PeftModel
         model = PeftModel.from_pretrained(model, adapter).merge_and_unload()
     device = "cuda" if torch.cuda.is_available() else "cpu"

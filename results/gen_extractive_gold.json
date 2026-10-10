@@ -1,0 +1,28 @@
+{
+  "system": "extractive",
+  "context": "gold",
+  "n": 400,
+  "rougeL": 0.9329,
+  "bertscore_f1": 0.9853,
+  "avg_words": 60.5,
+  "gold_in_context_rate": 1.0,
+  "rougeL_when_gold_in_context": 0.9329,
+  "by_source": {
+    "MedQuAD": {
+      "rougeL": 0.9572,
+      "bertscore_f1": 0.9903
+    },
+    "MedicationQA": {
+      "rougeL": 1.0,
+      "bertscore_f1": 1.0
+    },
+    "RwandaFDA-PIL": {
+      "rougeL": 0.7693,
+      "bertscore_f1": 0.952
+    },
+    "openFDA-templated": {
+      "rougeL": 0.9642,
+      "bertscore_f1": 0.9914
+    }
+  }
+}

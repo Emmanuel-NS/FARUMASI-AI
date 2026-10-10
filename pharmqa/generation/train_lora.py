@@ -16,9 +16,13 @@ from __future__ import annotations
 import argparse
 import random
 
-import torch
-from datasets import Dataset
-from peft import LoraConfig, TaskType, get_peft_model
+from pharmqa.compat import hide_incompatible_torchao
+
+hide_incompatible_torchao()
+
+import torch  # noqa: E402
+from datasets import Dataset  # noqa: E402
+from peft import LoraConfig, TaskType, get_peft_model  # noqa: E402
 from tqdm import tqdm
 from transformers import (AutoModelForSeq2SeqLM, AutoTokenizer, DataCollatorForSeq2Seq, Seq2SeqTrainer,
                           Seq2SeqTrainingArguments, set_seed)

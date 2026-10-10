@@ -24,6 +24,7 @@ from __future__ import annotations
 import argparse
 import json
 import random
+from pathlib import Path
 
 import evaluate
 import numpy as np
@@ -63,8 +64,11 @@ def load_generator(system: str, adapter: str = str(GENERATOR_ADAPTER_DIR)):
     tok = AutoTokenizer.from_pretrained(GENERATOR_BASE_MODEL)
     model = AutoModelForSeq2SeqLM.from_pretrained(GENERATOR_BASE_MODEL)
     if system == "lora":
-        from pharmqa.compat import hide_incompatible_torchao
+        if not (Path(adapter) / "adapter_config.json").exists():
+            raise SystemExit(f"LoRA adapter not found at {adapter}: run pharmqa.generation.train_lora first")
+        from pharmqa.compat import alias_renamed_seq2seq_methods, hide_incompatible_torchao
         hide_incompatible_torchao()
+        alias_renamed_seq2seq_methods(model)
         from peft import PeftModel
         model = PeftModel.from_pretrained(model, adapter).merge_and_unload()
     device = "cuda" if torch.cuda.is_available() else "cpu"

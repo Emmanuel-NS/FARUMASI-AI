@@ -36,7 +36,7 @@ Source code, data pipeline and experiments: see the GitHub repository linked in 
 SPACE_REQUIREMENTS = """torch
 transformers>=4.44
 sentence-transformers>=3.1
-peft>=0.12
+peft>=0.21
 scikit-learn>=1.4
 pandas>=2.1
 rank-bm25>=0.2.2
@@ -70,7 +70,15 @@ def main() -> None:
         (dst / "requirements.txt").write_text(SPACE_REQUIREMENTS, encoding="utf-8")
 
         api = HfApi()
-        api.create_repo(args.space, repo_type="space", space_sdk="gradio", exist_ok=True)
+        if not api.repo_exists(args.space, repo_type="space"):
+            try:
+                api.create_repo(args.space, repo_type="space", space_sdk="gradio")
+            except Exception as exc:  # noqa: BLE001 - HF returns 402 for scripted Space creation on some accounts
+                raise SystemExit(
+                    f"Could not create the Space ({exc}).\nCreate it in the browser instead: "
+                    "https://huggingface.co/new-space (SDK: Gradio, hardware: CPU basic - free), "
+                    f"name it '{args.space.split('/')[-1]}', then rerun this script to upload."
+                ) from exc
         api.upload_folder(folder_path=str(dst), repo_id=args.space, repo_type="space",
                           commit_message="Deploy FARUMASI Pharmacist Assistant")
     print(f"Deployed: https://huggingface.co/spaces/{args.space}")

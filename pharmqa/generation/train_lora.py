@@ -16,7 +16,7 @@ from __future__ import annotations
 import argparse
 import random
 
-from pharmqa.compat import hide_incompatible_torchao
+from pharmqa.compat import alias_renamed_seq2seq_methods, hide_incompatible_torchao
 
 hide_incompatible_torchao()
 
@@ -75,6 +75,7 @@ def main() -> None:
     train_ds, val_ds = to_ds("train", args.max_train), to_ds("val", args.max_val)
 
     model = AutoModelForSeq2SeqLM.from_pretrained(GENERATOR_BASE_MODEL)
+    alias_renamed_seq2seq_methods(model)
     model = get_peft_model(model, LoraConfig(
         task_type=TaskType.SEQ_2_SEQ_LM, r=args.rank, lora_alpha=2 * args.rank, lora_dropout=0.05,
         target_modules=["q", "v"],

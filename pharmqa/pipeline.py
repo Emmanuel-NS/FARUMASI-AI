@@ -82,8 +82,9 @@ class PharmacistAssistant:
         model = AutoModelForSeq2SeqLM.from_pretrained(GENERATOR_BASE_MODEL)
         kind = "flan_t5_zeroshot"
         if GENERATOR_ADAPTER_DIR.exists():
-            from pharmqa.compat import hide_incompatible_torchao
+            from pharmqa.compat import alias_renamed_seq2seq_methods, hide_incompatible_torchao
             hide_incompatible_torchao()
+            alias_renamed_seq2seq_methods(model)
             from peft import PeftModel
             model = PeftModel.from_pretrained(model, str(GENERATOR_ADAPTER_DIR)).merge_and_unload()
             kind = "flan_t5_lora"

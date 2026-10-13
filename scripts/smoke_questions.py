@@ -22,12 +22,29 @@ QUESTIONS = [
 ]
 
 
+# One conversation from testing the live app; later turns depend on earlier ones.
+CONVERSATION = [
+    "hey",
+    "i want more about after sex pills",
+    "i need more and examples of those pills",
+    "okay, which pills/ drugs of before sex to get best expireience",
+    "what do they do?",
+    "What are the side effects of metformin?",
+    "and how should I take it?",
+]
+
+
 def main() -> None:
-    questions = sys.argv[1:] or QUESTIONS
+    chat = sys.argv[1:] == ["--chat"]
+    questions = CONVERSATION if chat else (sys.argv[1:] or QUESTIONS)
     assistant = PharmacistAssistant()
+    earlier: list[str] = []
     for q in questions:
-        r = assistant.answer(q)
+        r = assistant.answer(q, earlier if chat else ())
+        earlier.append(q)
         print(f"Q: {q}\n   intent={r.intent} ({r.intent_confidence:.2f}) risk={r.risk_level}")
+        if r.interpreted and r.interpreted != q:
+            print(f"   understood as: {r.interpreted}")
         for s in r.sources:
             print(f"   [{s['score']:.3f}] {s['title']} ({s['source']})")
         print(f"A: {r.answer}\n")

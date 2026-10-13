@@ -23,7 +23,8 @@ from pharmqa.config import (CORPUS_EMB_PATH, GENERATOR_ADAPTER_DIR, GENERATOR_BA
                             INTENT_MODEL_DIR, INTENT_TFIDF_PATH, RETRIEVER_BASE_MODEL, RETRIEVER_MODEL_DIR,
                             SUPPLEMENTARY_EMB_PATH, SUPPLEMENTARY_PATH)
 from pharmqa.generation.common import build_prompt, extractive_answer
-from pharmqa.query import QueryAnalyzer, clean_passage, drug_of, expand, section_of, small_talk
+from pharmqa.query import (QueryAnalyzer, clean_passage, drug_of, expand, resolve_follow_up, section_of,
+                           small_talk)
 from pharmqa.retrieval.common import load_corpus
 
 OOD_REPLY = (
@@ -49,6 +50,7 @@ class Result:
     warnings: list[str] = field(default_factory=list)
     sources: list[dict] = field(default_factory=list)
     components: dict = field(default_factory=dict)
+    interpreted: str = ""  # the question after attaching the subject of earlier turns
 
 
 class PharmacistAssistant:
@@ -58,8 +60,9 @@ class PharmacistAssistant:
         self._load_intent()
         self._load_retriever()
         self._add_supplementary()
-        self.titles = self.corpus["title"].tolist()
-        self.analyzer = QueryAnalyzer(self.titles)
+        self.titles = self.corpus["title"].fillna("").tolist()
+        self.drugs = [drug_of(t, s) for t, s in zip(self.titles, self.corpus["source"])]
+        self.analyzer = QueryAnalyzer(self.drugs)
         self.gen = self._load_generator() if use_generator else None
 
     # Components -----------------------------------------------------------------
@@ -138,18 +141,17 @@ class PharmacistAssistant:
         sims = self.emb @ q
         cand = np.argsort(-sims)[:CANDIDATES]
         if focus.drugs:
-            named = [i for i, t in enumerate(self.titles) if drug_of(t) in focus.drugs]
+            named = [i for i, d in enumerate(self.drugs) if d in focus.drugs]
             cand = np.unique(np.concatenate([cand, np.array(named, dtype=int)]))
 
         def boosted(i: int) -> float:
-            title = self.titles[i]
-            on_drug = drug_of(title) in focus.drugs
-            return sims[i] + DRUG_BOOST * on_drug + SECTION_BOOST * (on_drug and section_of(title) in focus.sections)
+            on_drug = self.drugs[i] in focus.drugs
+            return sims[i] + DRUG_BOOST * on_drug + SECTION_BOOST * (on_drug and section_of(self.titles[i]) in focus.sections)
 
         top = sorted(cand, key=boosted, reverse=True)[:k]
         cols = [c for c in ("id", "title", "text", "source", "full", "url") if c in self.corpus]
         return [{**self.corpus.iloc[i][cols].to_dict(), "score": float(sims[i]),
-                 "on_topic": drug_of(self.titles[i]) in focus.drugs} for i in top]
+                 "on_topic": self.drugs[i] in focus.drugs} for i in top]
 
     @torch.no_grad()
     def generate(self, question: str, passages: list[str]) -> str:
@@ -162,27 +164,38 @@ class PharmacistAssistant:
         return tok.decode(ids[0], skip_special_tokens=True)
 
     # Public API ------------------------------------------------------------------
-    def answer(self, question: str) -> Result:
-        risk = safety.assess(question)
+    def resolve(self, question: str, earlier: list[str]) -> str:
+        """Carry the subject of earlier user turns into follow-ups ("what do they do?")."""
+        context = None
+        for msg in earlier:
+            if not small_talk(msg):
+                context = resolve_follow_up(msg, context, self.analyzer.has_own_topic)
+        return resolve_follow_up(question, context, self.analyzer.has_own_topic)
+
+    def answer(self, question: str, earlier: list[str] | tuple = ()) -> Result:
+        """`earlier` = the user's previous messages in this conversation, oldest first."""
         components = {"intent_model": self.intent_kind, "retriever": self.retriever_kind,
                       "generator": self.gen[2] if self.gen else "extractive"}
         chat_reply = small_talk(question)
-        if chat_reply and risk.level == "routine":
-            return Result(question, "small_talk", 1.0, risk.level, chat_reply, components=components)
-        intent, conf = self.classify(question)
+        if chat_reply and safety.assess(question).level == "routine":
+            return Result(question, "small_talk", 1.0, "routine", chat_reply, components=components, interpreted=question)
+        q = self.resolve(question, list(earlier))
+        risk = safety.assess(q)
+        intent, conf = self.classify(q)
 
         # Emergencies always get the safety message, even if the classifier is unsure.
         if intent == "out_of_domain" and risk.level != "emergency":
-            return Result(question, intent, conf, risk.level, OOD_REPLY, components=components)
+            return Result(question, intent, conf, risk.level, OOD_REPLY, components=components, interpreted=q)
 
-        hits = self.retrieve(question)
+        hits = self.retrieve(q)
         if hits[0]["score"] < MIN_RETRIEVAL_SIM:
             answer = LOW_CONFIDENCE_REPLY
         else:
             # When the question names a medicine, read only passages about it, so the reader cannot copy
             # a neighbouring drug's label (e.g. metoclopramide when asked about metformin).
             context = [h for h in hits if h["on_topic"]] or hits
-            answer = safety.localize(self.generate(question, [h["full"] for h in context]))
+            answer = safety.localize(self.generate(q, [h["full"] for h in context]))
         sources = [{"title": h["title"], "source": h["source"], "score": round(h["score"], 3), "text": h["text"],
                     "url": h.get("url") if isinstance(h.get("url"), str) else None} for h in hits]
-        return Result(question, intent, conf, risk.level, answer, risk.warnings() + [safety.DISCLAIMER], sources, components)
+        return Result(question, intent, conf, risk.level, answer, risk.warnings() + [safety.DISCLAIMER], sources,
+                      components, interpreted=q)

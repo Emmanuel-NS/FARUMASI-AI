@@ -155,6 +155,8 @@ without retraining any model, so the tables above are unchanged.
 | "side effects of metformin" | Metoclopramide side effects | Reader copied the third passage (another drug); the stored metformin label was a sitagliptin + metformin combination | Re-rank passages about the medicine named in the question (+section, e.g. "side effects") and give the reader only those; single-ingredient metformin label |
 | "Can I take panadol while pregnant?" | Tramadol pregnancy section | Brand name unknown to the retriever | Brand-name expansion |
 | "Should Coartem be taken with food?" | Garbled leaflet text | Noisy two-column PDF passage | Brand → generic expansion reaches the clear FDA dosage section ("should be taken with food") |
+| "examples of those pills", "what do they do?" | Out-of-scope refusal / no information | Every message was answered on its own, with no memory of the conversation | Short follow-ups with a pronoun ("those", "it", "they", "more") and no medicine of their own inherit the previous question's subject; the app shows "Understood as" |
+| "which pills before sex to get the best experience" | Menopause hormone therapy text | Lay wording (and a typo) matched nothing | Lay-term rule → erectile dysfunction / sexual problems in men (NIH passages that advise seeing a doctor) |
 
 The original download picked, for each medicine, the openFDA label with the most patient
 sections, which sometimes selected a combination product. `scripts/fetch_supplementary.py`

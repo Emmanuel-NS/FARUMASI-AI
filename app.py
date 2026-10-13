@@ -42,7 +42,8 @@ def _source_label(s: dict) -> str:
 
 @gpu
 def respond(message: str, history: list[dict]):
-    r = assistant.answer(message)
+    earlier = [m["content"] for m in history if m.get("role") == "user" and isinstance(m.get("content"), str)]
+    r = assistant.answer(message, earlier)
     parts = []
     if r.risk_level == "emergency":
         parts.append(f"**{r.warnings[0]}**")
@@ -53,7 +54,8 @@ def respond(message: str, history: list[dict]):
     history = history + [{"role": "user", "content": message}, {"role": "assistant", "content": "\n\n".join(parts)}]
 
     details = (
-        f"**Predicted intent:** {INTENT_NAMES[r.intent]} ({r.intent_confidence:.0%} confidence)  \n"
+        (f"**Understood as (follow-up):** {r.interpreted}  \n" if r.interpreted and r.interpreted != message else "")
+        + f"**Predicted intent:** {INTENT_NAMES[r.intent]} ({r.intent_confidence:.0%} confidence)  \n"
         f"**Risk level:** {RISK_NAMES[r.risk_level]}  \n"
         f"**Models used:** intent = `{r.components['intent_model']}`, retriever = `{r.components['retriever']}`, "
         f"generator = `{r.components['generator']}`"

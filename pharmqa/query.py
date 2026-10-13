@@ -155,6 +155,15 @@ _CROSS_REF = re.compile(
 _HEADING_LEFTOVER = re.compile(r"^[&\s]*(?:[A-Z&]{2,}\s+)+(?=[A-Z][a-z])")
 
 
+def is_stub(passage_id: str, text: str) -> bool:
+    """Near-empty passages: tails of split label sections ("WARNINGS .", "of adverse effects.") and
+    MedicationQA answers that are only a link title ("Expiration Dates - Questions and Answers ...")."""
+    words = text.split()
+    if len(words) < 4:
+        return True
+    return len(words) < 12 and (text.rstrip().endswith("...") or passage_id.endswith(":1") or not text[0].isupper())
+
+
 def clean_passage(full: str) -> str:
     """Drop label cross-references ("[see Warnings and Precautions (5.1)]", "8.1 ") and heading leftovers
     ("& USAGE") that the reader tends to copy. `full` is "Title. passage text"."""

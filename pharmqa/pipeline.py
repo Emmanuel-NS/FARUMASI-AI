@@ -23,8 +23,8 @@ from pharmqa.config import (CORPUS_EMB_PATH, GENERATOR_ADAPTER_DIR, GENERATOR_BA
                             INTENT_MODEL_DIR, INTENT_TFIDF_PATH, RETRIEVER_BASE_MODEL, RETRIEVER_MODEL_DIR,
                             SUPPLEMENTARY_EMB_PATH, SUPPLEMENTARY_PATH)
 from pharmqa.generation.common import build_prompt, extractive_answer
-from pharmqa.query import (QueryAnalyzer, clean_passage, drug_of, expand, resolve_follow_up, section_of,
-                           small_talk)
+from pharmqa.query import (QueryAnalyzer, clean_passage, drug_of, expand, is_stub, resolve_follow_up,
+                           section_of, small_talk)
 from pharmqa.retrieval.common import load_corpus
 
 OOD_REPLY = (
@@ -62,6 +62,7 @@ class PharmacistAssistant:
         self._add_supplementary()
         self.titles = self.corpus["title"].fillna("").tolist()
         self.drugs = [drug_of(t, s) for t, s in zip(self.titles, self.corpus["source"])]
+        self.stub = np.array([is_stub(i, t) for i, t in zip(self.corpus["id"], self.corpus["text"].fillna(""))])
         self.analyzer = QueryAnalyzer(self.drugs)
         self.gen = self._load_generator() if use_generator else None
 
@@ -143,6 +144,7 @@ class PharmacistAssistant:
         if focus.drugs:
             named = [i for i, d in enumerate(self.drugs) if d in focus.drugs]
             cand = np.unique(np.concatenate([cand, np.array(named, dtype=int)]))
+        cand = cand[~self.stub[cand]]
 
         def boosted(i: int) -> float:
             on_drug = self.drugs[i] in focus.drugs

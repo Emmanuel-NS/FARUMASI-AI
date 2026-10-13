@@ -50,6 +50,7 @@ def main() -> None:
     ap.add_argument("--max_val", type=int, default=400)
     ap.add_argument("--out", default=str(GENERATOR_ADAPTER_DIR))
     ap.add_argument("--exclude_source", default="", help="train without this source (before/after experiment; set --out too)")
+    ap.add_argument("--resume", action="store_true", help="continue from the last epoch checkpoint in --out/checkpoints")
     args = ap.parse_args()
     set_seed(SEED)
 
@@ -102,7 +103,7 @@ def main() -> None:
         train_dataset=train_ds, eval_dataset=val_ds,
         data_collator=DataCollatorForSeq2Seq(tok, model=model),
     )
-    trainer.train()
+    trainer.train(resume_from_checkpoint=args.resume or None)
     model.save_pretrained(args.out)
     tok.save_pretrained(args.out)
     print(f"saved LoRA adapter -> {args.out}")

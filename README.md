@@ -28,6 +28,7 @@ ailments, scoped to the WHO Model List of Essential Medicines.
 
 ```
 question ─► risk detector (rules) ─────────────────────────────► safety warnings
+         └► greeting? (rules) ──► short introduction
          └► intent classifier (DistilBERT) ─► out of scope? ──► polite refusal
                                             └► retriever (fine-tuned MiniLM) ─► top-3 passages
                                                   └► reader (Flan-T5-base + LoRA) ─► short answer
@@ -141,6 +142,27 @@ so copying the gold passage reproduces them almost exactly.
   still returned "I couldn't find reliable information". US label text can mention US-only
   services (Poison Control 1-800-222-1222); answers are post-processed to point to 912 instead.
 
+### Fixes from testing the live app
+
+Testing the deployed app with realistic patient messages exposed failures the benchmark did not
+measure. They were fixed in the answering pipeline (`pharmqa/query.py`, `pharmqa/pipeline.py`)
+without retraining any model, so the tables above are unchanged.
+
+| Patient message | Before | Cause | Fix |
+|---|---|---|---|
+| "hey", "thank you" | Out-of-scope refusal | Intent classes have no greeting class | Rule-based small-talk replies |
+| "after sex pills for pregnancy prevention" | Generic "medicines in pregnancy" text | Lay wording; the stored levonorgestrel label was a daily combined pill | Lay/brand-name expansion (morning-after pill, panadol, brufen, flagyl, septrin...) and the OTC emergency-contraceptive label |
+| "side effects of metformin" | Metoclopramide side effects | Reader copied the third passage (another drug); the stored metformin label was a sitagliptin + metformin combination | Re-rank passages about the medicine named in the question (+section, e.g. "side effects") and give the reader only those; single-ingredient metformin label |
+| "Can I take panadol while pregnant?" | Tramadol pregnancy section | Brand name unknown to the retriever | Brand-name expansion |
+| "Should Coartem be taken with food?" | Garbled leaflet text | Noisy two-column PDF passage | Brand → generic expansion reaches the clear FDA dosage section ("should be taken with food") |
+
+The original download picked, for each medicine, the openFDA label with the most patient
+sections, which sometimes selected a combination product. `scripts/fetch_supplementary.py`
+fetches the correct single-product labels (`data/external/supplementary_labels.jsonl`); the app
+swaps them in at start-up and embeds them with the trained retriever. Label cross-references
+("[see Warnings and Precautions (5.1)]") and US adverse-event reporting boilerplate are removed
+before the reader sees a passage. `scripts/smoke_questions.py` reruns these messages end to end.
+
 ## Reproduce
 
 ```bash
@@ -169,6 +191,7 @@ pharmqa/intent/      TF-IDF baseline, DistilBERT fine-tuning
 pharmqa/retrieval/   BM25, dense MiniLM (zero-shot, fine-tuned, hybrid), metrics
 pharmqa/generation/  Flan-T5 + LoRA reader training and evaluation
 pharmqa/safety.py    rule-based risk detector;  pharmqa/pipeline.py end-to-end assistant
+pharmqa/query.py     greetings, brand/lay-name expansion, medicine + section focus, passage cleaning
 app.py               Gradio web app;  notebooks/ Colab pipeline;  results/ metrics and error files
 ```
 
@@ -180,6 +203,8 @@ app.py               Gradio web app;  notebooks/ Colab pipeline;  results/ metri
 - English only; Kinyarwanda and French questions are out of scope for this version.
 - Intent augmentation labels are heuristic; the challenge set is small and was used to refine the safety rules, so its safety score is optimistic.
 - ROUGE/BERTScore measure similarity to a reference, not clinical correctness.
+- The reader was trained to copy the relevant passage, so answers keep label wording (written for clinicians) rather than plain-language summaries; general symptom questions ("headache, what can I take?") get a description of the condition more often than treatment advice.
+- Only a few wrong openFDA labels (metformin, levonorgestrel) were corrected; other medicines may have the same combination-product problem.
 
 ## Acknowledgements and AI use
 

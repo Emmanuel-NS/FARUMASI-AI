@@ -59,6 +59,8 @@ def main() -> None:
         shutil.copytree(ROOT / "pharmqa", dst / "pharmqa", ignore=shutil.ignore_patterns("__pycache__"))
         (dst / "data" / "processed").mkdir(parents=True)
         shutil.copy(ROOT / "data" / "processed" / "corpus.jsonl", dst / "data" / "processed" / "corpus.jsonl")
+        (dst / "data" / "external").mkdir(parents=True)
+        shutil.copy(ROOT / "data" / "external" / "supplementary_labels.jsonl", dst / "data" / "external")
         art = ROOT / "artifacts"
         for item in ("intent_distilbert", "retriever_minilm_ft", "generator_flant5_lora",
                      "corpus_embeddings.npy", "intent_tfidf.joblib"):

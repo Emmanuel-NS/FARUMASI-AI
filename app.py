@@ -25,12 +25,13 @@ EXAMPLES = [
     "I have a headache since morning, what can I take?",
     "How do I clean a small wound from a fall?",
     "Is it safe to take ibuprofen while breastfeeding?",
+    "How does the morning-after pill work?",
     "My son swallowed a bottle of paracetamol",
     "What is the exchange rate of the Rwandan franc?",
 ]
 
 INTENT_NAMES = {"medicine_info": "Medicine information", "condition_advice": "Symptom / condition advice",
-                "out_of_domain": "Outside pharmacy scope"}
+                "out_of_domain": "Outside pharmacy scope", "small_talk": "Greeting / small talk (rule)"}
 RISK_NAMES = {"routine": "Routine", "prescription": "Prescription-only medicine",
               "special_group": "Special population", "emergency": "Possible emergency"}
 
@@ -60,7 +61,7 @@ def respond(message: str, history: list[dict]):
     sources = "\n\n".join(
         f"**{i}. {s['title']}** ({_source_label(s)}, similarity {s['score']})  \n{s['text'][:400]}..."
         for i, s in enumerate(r.sources, 1)
-    ) or "_No passages retrieved (question was outside the pharmacy scope)._"
+    ) or "_No passages retrieved (greeting, or question outside the pharmacy scope)._"
     return history, "", details, sources
 
 

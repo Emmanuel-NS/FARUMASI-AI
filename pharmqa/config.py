@@ -27,3 +27,6 @@ INTENT_MODEL_DIR = ARTIFACTS / "intent_distilbert"
 RETRIEVER_MODEL_DIR = ARTIFACTS / "retriever_minilm_ft"
 GENERATOR_ADAPTER_DIR = ARTIFACTS / "generator_flant5_lora"
 CORPUS_EMB_PATH = ARTIFACTS / "corpus_embeddings.npy"
+
+# Corrected openFDA labels added to the app's corpus at start-up (scripts/fetch_supplementary.py).
+SUPPLEMENTARY_PATH = DATA / "external" / "supplementary_labels.jsonl"

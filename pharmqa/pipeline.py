@@ -15,12 +15,15 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 import numpy as np
+import pandas as pd
 import torch
 
 from pharmqa import safety
 from pharmqa.config import (CORPUS_EMB_PATH, GENERATOR_ADAPTER_DIR, GENERATOR_BASE_MODEL, INTENT_LABELS,
-                            INTENT_MODEL_DIR, INTENT_TFIDF_PATH, RETRIEVER_BASE_MODEL, RETRIEVER_MODEL_DIR)
+                            INTENT_MODEL_DIR, INTENT_TFIDF_PATH, RETRIEVER_BASE_MODEL, RETRIEVER_MODEL_DIR,
+                            SUPPLEMENTARY_PATH)
 from pharmqa.generation.common import build_prompt, extractive_answer
+from pharmqa.query import QueryAnalyzer, clean_passage, drug_of, expand, section_of, small_talk
 from pharmqa.retrieval.common import load_corpus
 
 OOD_REPLY = (
@@ -28,10 +31,12 @@ OOD_REPLY = (
     "health problems. For anything else, please use another service."
 )
 LOW_CONFIDENCE_REPLY = (
-    "I couldn't find reliable information for this question in my sources. Please ask a pharmacist or "
-    "doctor directly."
+    "I couldn't find reliable information about this in my medicine and health sources. If it is a health "
+    "question, please ask a pharmacist or doctor directly."
 )
 MIN_RETRIEVAL_SIM = 0.35  # below this cosine similarity the top passage is unlikely to be relevant
+CANDIDATES = 50           # dense hits re-ranked by the medicine / section the question names
+DRUG_BOOST, SECTION_BOOST = 0.15, 0.08
 
 
 @dataclass
@@ -52,6 +57,9 @@ class PharmacistAssistant:
         self.corpus = load_corpus()
         self._load_intent()
         self._load_retriever()
+        self._add_supplementary()
+        self.titles = self.corpus["title"].tolist()
+        self.analyzer = QueryAnalyzer(self.titles)
         self.gen = self._load_generator() if use_generator else None
 
     # Components -----------------------------------------------------------------
@@ -75,6 +83,18 @@ class PharmacistAssistant:
         else:
             self.emb = self.retriever.encode(self.corpus["full"].tolist(), batch_size=128, normalize_embeddings=True)
         self.retriever_kind = "minilm_finetuned" if finetuned else "minilm_zeroshot"
+
+    def _add_supplementary(self) -> None:
+        """Swap in corrected openFDA labels for medicines whose original label was the wrong product."""
+        if not SUPPLEMENTARY_PATH.exists():
+            return
+        extra = pd.read_json(SUPPLEMENTARY_PATH, lines=True)
+        extra["full"] = extra["title"] + ". " + extra["text"]
+        replaced = set(extra["title"].map(drug_of))
+        keep = ~(self.corpus["source"].eq("openFDA") & self.corpus["title"].fillna("").map(drug_of).isin(replaced))
+        extra_emb = self.retriever.encode(extra["full"].tolist(), batch_size=64, normalize_embeddings=True)
+        self.corpus = pd.concat([self.corpus[keep], extra], ignore_index=True)
+        self.emb = np.vstack([self.emb[keep.to_numpy()], extra_emb])
 
     def _load_generator(self):
         from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
@@ -103,14 +123,33 @@ class PharmacistAssistant:
         return classes[int(probs.argmax())], float(probs.max())
 
     def retrieve(self, text: str, k: int = 3) -> list[dict]:
-        q = self.retriever.encode([text], normalize_embeddings=True)[0]
+        """Dense retrieval, then passages about the medicine and section the question names move up.
+
+        `score` stays the raw cosine similarity (used for the confidence threshold); `on_topic` marks
+        passages about a medicine named in the question.
+        """
+        expanded = expand(text)
+        focus = self.analyzer.focus(expanded)
+        q = self.retriever.encode([expanded], normalize_embeddings=True)[0]
         sims = self.emb @ q
-        top = np.argsort(-sims)[:k]
+        cand = np.argsort(-sims)[:CANDIDATES]
+        if focus.drugs:
+            named = [i for i, t in enumerate(self.titles) if drug_of(t) in focus.drugs]
+            cand = np.unique(np.concatenate([cand, np.array(named, dtype=int)]))
+
+        def boosted(i: int) -> float:
+            title = self.titles[i]
+            on_drug = drug_of(title) in focus.drugs
+            return sims[i] + DRUG_BOOST * on_drug + SECTION_BOOST * (on_drug and section_of(title) in focus.sections)
+
+        top = sorted(cand, key=boosted, reverse=True)[:k]
         cols = [c for c in ("id", "title", "text", "source", "full", "url") if c in self.corpus]
-        return [{**self.corpus.iloc[i][cols].to_dict(), "score": float(sims[i])} for i in top]
+        return [{**self.corpus.iloc[i][cols].to_dict(), "score": float(sims[i]),
+                 "on_topic": drug_of(self.titles[i]) in focus.drugs} for i in top]
 
     @torch.no_grad()
     def generate(self, question: str, passages: list[str]) -> str:
+        passages = [clean_passage(p) for p in passages]
         if self.gen is None:
             return extractive_answer(passages[0])
         tok, model, _ = self.gen
@@ -121,9 +160,12 @@ class PharmacistAssistant:
     # Public API ------------------------------------------------------------------
     def answer(self, question: str) -> Result:
         risk = safety.assess(question)
-        intent, conf = self.classify(question)
         components = {"intent_model": self.intent_kind, "retriever": self.retriever_kind,
                       "generator": self.gen[2] if self.gen else "extractive"}
+        chat_reply = small_talk(question)
+        if chat_reply and risk.level == "routine":
+            return Result(question, "small_talk", 1.0, risk.level, chat_reply, components=components)
+        intent, conf = self.classify(question)
 
         # Emergencies always get the safety message, even if the classifier is unsure.
         if intent == "out_of_domain" and risk.level != "emergency":
@@ -133,7 +175,10 @@ class PharmacistAssistant:
         if hits[0]["score"] < MIN_RETRIEVAL_SIM:
             answer = LOW_CONFIDENCE_REPLY
         else:
-            answer = safety.localize(self.generate(question, [h["full"] for h in hits]))
+            # When the question names a medicine, read only passages about it, so the reader cannot copy
+            # a neighbouring drug's label (e.g. metoclopramide when asked about metformin).
+            context = [h for h in hits if h["on_topic"]] or hits
+            answer = safety.localize(self.generate(question, [h["full"] for h in context]))
         sources = [{"title": h["title"], "source": h["source"], "score": round(h["score"], 3), "text": h["text"],
                     "url": h.get("url") if isinstance(h.get("url"), str) else None} for h in hits]
         return Result(question, intent, conf, risk.level, answer, risk.warnings() + [safety.DISCLAIMER], sources, components)

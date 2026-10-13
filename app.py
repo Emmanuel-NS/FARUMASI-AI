@@ -1,9 +1,19 @@
 """Gradio web app for the FARUMASI Pharmacist Assistant (deployed on Hugging Face Spaces)."""
 from __future__ import annotations
 
-import gradio as gr
+# On Hugging Face ZeroGPU, `spaces` must be imported before torch, and only functions wrapped in
+# spaces.GPU get a GPU; elsewhere (local runs) the wrapper is a no-op.
+try:
+    import spaces
 
-from pharmqa.pipeline import PharmacistAssistant
+    gpu = spaces.GPU(duration=60)
+except ImportError:
+    def gpu(fn):
+        return fn
+
+import gradio as gr  # noqa: E402
+
+from pharmqa.pipeline import PharmacistAssistant  # noqa: E402
 
 assistant = PharmacistAssistant()
 
@@ -29,6 +39,7 @@ def _source_label(s: dict) -> str:
     return f"[{s['source']}]({s['url']})" if s.get("url") else s["source"]
 
 
+@gpu
 def respond(message: str, history: list[dict]):
     r = assistant.answer(message)
     parts = []

@@ -30,13 +30,16 @@ license: mit
 ---
 
 Domain-specific medicine question answering for community pharmacy in Rwanda.
-Source code, data pipeline and experiments: see the GitHub repository linked in the app description.
+Source code, data pipeline and experiments: https://github.com/Emmanuel-NS/FARUMASI-AI
 """
 
 SPACE_REQUIREMENTS = """torch
-transformers>=4.44
-sentence-transformers>=3.1
-peft>=0.21
+spaces
+transformers==5.19.0
+tokenizers==0.23.2
+sentence-transformers==6.1.0
+peft==0.21.2
+accelerate==1.15.0
 scikit-learn>=1.4
 pandas>=2.1
 rank-bm25>=0.2.2
@@ -76,7 +79,7 @@ def main() -> None:
             except Exception as exc:  # noqa: BLE001 - HF returns 402 for scripted Space creation on some accounts
                 raise SystemExit(
                     f"Could not create the Space ({exc}).\nCreate it in the browser instead: "
-                    "https://huggingface.co/new-space (SDK: Gradio, hardware: CPU basic - free), "
+                    "https://huggingface.co/new-space (SDK: Gradio, template: Blank, hardware: ZeroGPU - free), "
                     f"name it '{args.space.split('/')[-1]}', then rerun this script to upload."
                 ) from exc
         api.upload_folder(folder_path=str(dst), repo_id=args.space, repo_type="space",

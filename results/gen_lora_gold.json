@@ -1,0 +1,28 @@
+{
+  "system": "lora",
+  "context": "gold",
+  "n": 400,
+  "rougeL": 0.6077,
+  "bertscore_f1": 0.8996,
+  "avg_words": 36.9,
+  "gold_in_context_rate": 1.0,
+  "rougeL_when_gold_in_context": 0.6077,
+  "by_source": {
+    "MedQuAD": {
+      "rougeL": 0.6273,
+      "bertscore_f1": 0.9029
+    },
+    "MedicationQA": {
+      "rougeL": 0.6613,
+      "bertscore_f1": 0.9033
+    },
+    "RwandaFDA-PIL": {
+      "rougeL": 0.4787,
+      "bertscore_f1": 0.868
+    },
+    "openFDA-templated": {
+      "rougeL": 0.6314,
+      "bertscore_f1": 0.9102
+    }
+  }
+}

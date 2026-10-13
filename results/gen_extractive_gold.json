@@ -2,15 +2,15 @@
   "system": "extractive",
   "context": "gold",
   "n": 400,
-  "rougeL": 0.9329,
-  "bertscore_f1": 0.9853,
-  "avg_words": 60.5,
+  "rougeL": 0.931,
+  "bertscore_f1": 0.9852,
+  "avg_words": 62.3,
   "gold_in_context_rate": 1.0,
-  "rougeL_when_gold_in_context": 0.9329,
+  "rougeL_when_gold_in_context": 0.931,
   "by_source": {
     "MedQuAD": {
-      "rougeL": 0.9572,
-      "bertscore_f1": 0.9903
+      "rougeL": 0.9535,
+      "bertscore_f1": 0.9901
     },
     "MedicationQA": {
       "rougeL": 1.0,

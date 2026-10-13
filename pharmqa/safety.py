@@ -61,6 +61,15 @@ DISCLAIMER = (
     "worse, see a doctor or pharmacist."
 )
 
+# US label text (openFDA) points to US-only services; answers are shown to patients in Rwanda.
+_US_HOTLINE = re.compile(r"\(?\b(?:1[-.\s])?\(?(?:800|888|877|866|855)\)?[-.\s]?\d{3}[-.\s]?\d{4}\b\)?")
+_US_POISON_CENTER = re.compile(r"\b(?:a\s+|the\s+)?Poison Control Center\b", re.IGNORECASE)
+
+
+def localize(answer: str) -> str:
+    answer = _US_HOTLINE.sub("912 (SAMU, Rwanda)", answer)
+    return _US_POISON_CENTER.sub("emergency services", answer)
+
 
 @dataclass
 class RiskAssessment:

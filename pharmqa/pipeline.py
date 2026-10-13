@@ -132,7 +132,7 @@ class PharmacistAssistant:
         if hits[0]["score"] < MIN_RETRIEVAL_SIM:
             answer = LOW_CONFIDENCE_REPLY
         else:
-            answer = self.generate(question, [h["full"] for h in hits])
+            answer = safety.localize(self.generate(question, [h["full"] for h in hits]))
         sources = [{"title": h["title"], "source": h["source"], "score": round(h["score"], 3), "text": h["text"],
                     "url": h.get("url") if isinstance(h.get("url"), str) else None} for h in hits]
         return Result(question, intent, conf, risk.level, answer, risk.warnings() + [safety.DISCLAIMER], sources, components)

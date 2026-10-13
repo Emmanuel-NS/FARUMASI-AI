@@ -63,10 +63,12 @@
 
 | system     | context   |   n |   ROUGE-L |   BERTScore-F1 |   avg words |   Rwanda PIL ROUGE-L |
 |:-----------|:----------|----:|----------:|---------------:|------------:|---------------------:|
-| extractive | gold      | 400 |    0.9329 |         0.9853 |        60.5 |               0.7693 |
-| extractive | retrieved | 400 |    0.7109 |         0.9227 |        56.4 |               0.5757 |
-| zeroshot   | gold      | 400 |    0.1899 |         0.76   |         9   |               0.1561 |
-| zeroshot   | retrieved | 400 |    0.1889 |         0.7617 |         9   |               0.1424 |
+| extractive | gold      | 400 |    0.931  |         0.9852 |        62.3 |               0.7693 |
+| extractive | retrieved | 400 |    0.3953 |         0.8328 |        59.9 |               0.4596 |
+| lora       | gold      | 400 |    0.6077 |         0.8996 |        36.9 |               0.4787 |
+| lora       | retrieved | 400 |    0.4138 |         0.8412 |        34.7 |               0.4289 |
+| zeroshot   | gold      | 400 |    0.1911 |         0.761  |         8.7 |               0.1472 |
+| zeroshot   | retrieved | 400 |    0.1603 |         0.7477 |         8.9 |               0.1378 |
 
 ## Safety risk detector (challenge set)
 

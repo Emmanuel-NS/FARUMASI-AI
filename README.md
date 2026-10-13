@@ -113,7 +113,32 @@ this; DistilBERT with patient questions is the best model on real consumer text.
 - Hybrid RRF is *worse* than the fine-tuned model alone: once the dense model is strong,
   fusing in BM25's weaker ranking pulls good passages down.
 
-**Answer generation (400 test questions):** see `results/summary.md`.
+**Answer generation (400 test questions, stratified by source).** "Gold" context = the gold
+passage shuffled with 2 BM25 hard negatives (tests the reader alone). "Retrieved" = top-3 BM25
+passages in this run (the gold passage was in context for 59% of questions; with the fine-tuned
+retriever it is 90%, see the earlier run in the git history).
+
+| Reader | Context | ROUGE-L | BERTScore-F1 | Avg words | Rwanda PIL ROUGE-L |
+|---|---|---|---|---|---|
+| Extractive (copy top passage) | gold | 0.931* | 0.985* | 62 | 0.769* |
+| Flan-T5-base zero-shot | gold | 0.191 | 0.761 | 9 | 0.147 |
+| **Flan-T5-base + LoRA** (deployed) | gold | **0.608** | **0.900** | 37 | **0.479** |
+| Extractive | retrieved | 0.395 | 0.833 | 60 | 0.460 |
+| Flan-T5-base zero-shot | retrieved | 0.160 | 0.748 | 9 | 0.138 |
+| **Flan-T5-base + LoRA** | retrieved | **0.414** | **0.841** | 35 | 0.429 |
+
+\* Upper bound, not a fair comparison: references are the first sentences of the gold passage,
+so copying the gold passage reproduces them almost exactly.
+
+- LoRA (rank 16, 0.7% of parameters trained) triples ROUGE-L over zero-shot Flan-T5,
+  which answers in ~9 words and often just names the medicine.
+- With noisy retrieved context, LoRA beats the extractive baseline (0.414 vs 0.395) because it
+  learned to pick the relevant passage out of three instead of always copying the first one.
+- Error analysis (app test): for "What is Coartem used for?" the right passage was retrieved but
+  the reader copied text from a neighbouring passage; and "What is the exchange rate of the
+  Rwandan franc?" was misclassified as health advice, but the retrieval-similarity threshold
+  still returned "I couldn't find reliable information". US label text can mention US-only
+  services (Poison Control 1-800-222-1222); answers are post-processed to point to 912 instead.
 
 ## Reproduce
 

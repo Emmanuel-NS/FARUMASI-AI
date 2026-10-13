@@ -156,6 +156,9 @@ without retraining any model, so the tables above are unchanged.
 | "Can I take panadol while pregnant?" | Tramadol pregnancy section | Brand name unknown to the retriever | Brand-name expansion |
 | "Should Coartem be taken with food?" | Garbled leaflet text | Noisy two-column PDF passage | Brand → generic expansion reaches the clear FDA dosage section ("should be taken with food") |
 | "examples of those pills", "what do they do?" | Out-of-scope refusal / no information | Every message was answered on its own, with no memory of the conversation | Short follow-ups with a pronoun ("those", "it", "they", "more") and no medicine of their own inherit the previous question's subject; the app shows "Understood as" |
+| "can I get more info on them", "I need a full and detailed answer" | The same one-line answer every time | The reader always picks the single best passage | Detail requests get an overview of up to five leaflet sections (uses, how to take, who should not take it, side effects, examples); each further "more" adds sections not shown yet (warnings, interactions, pregnancy, storage), then says that is all the sources contain |
+| "can I get some examples of those pills" | No information | No brand names in the corpus | "Examples" passages built from brand names on US FDA labels, with a note that Rwandan brands differ |
+| "you keep saying same things", "you're stupid" | Treated as a follow-up / out-of-scope refusal | No handling of feedback | Polite reply explaining how to ask for one section or for full details |
 | "which pills before sex to get the best experience" | Menopause hormone therapy text | Lay wording (and a typo) matched nothing | Lay-term rule → erectile dysfunction / sexual problems in men (NIH passages that advise seeing a doctor) |
 
 The original download picked, for each medicine, the openFDA label with the most patient

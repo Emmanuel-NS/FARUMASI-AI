@@ -42,8 +42,9 @@ def _source_label(s: dict) -> str:
 
 @gpu
 def respond(message: str, history: list[dict]):
-    earlier = [m["content"] for m in history if m.get("role") == "user" and isinstance(m.get("content"), str)]
-    r = assistant.answer(message, earlier)
+    said = {role: [m["content"] for m in history if m.get("role") == role and isinstance(m.get("content"), str)]
+            for role in ("user", "assistant")}
+    r = assistant.answer(message, said["user"], said["assistant"])
     parts = []
     if r.risk_level == "emergency":
         parts.append(f"**{r.warnings[0]}**")

@@ -4,7 +4,8 @@ The main download keeps, per medicine, the openFDA label with the richest patien
 few medicines that picks the wrong product (metformin -> a sitagliptin/metformin combination;
 levonorgestrel -> a daily combined pill instead of the morning-after pill). These passages are
 appended to the corpus at app start-up and embedded with the trained retriever; no model is
-retrained and the evaluation corpus is unchanged.
+retrained and the evaluation corpus is unchanged. For the same medicines an "Examples" passage
+lists brand names found on US FDA labels, so "examples of those pills" can be answered.
 
 Usage:  python scripts/fetch_supplementary.py            (fetch + embed)
         python scripts/fetch_supplementary.py --embed    (re-embed after retraining the retriever)
@@ -12,6 +13,7 @@ Usage:  python scripts/fetch_supplementary.py            (fetch + embed)
 from __future__ import annotations
 
 import json
+import re
 
 import requests
 
@@ -26,6 +28,23 @@ LABELS = [
     ("metformin", "single-ingredient tablets",
      'openfda.generic_name.exact:"METFORMIN HYDROCHLORIDE" AND _exists_:adverse_reactions'),
 ]
+MAX_BRANDS = 12
+
+
+def brand_names(search: str) -> list[str]:
+    r = requests.get(OPENFDA_URL, params={"search": search, "count": "openfda.brand_name.exact", "limit": 50}, timeout=30)
+    r.raise_for_status()
+    names = []
+    for row in r.json()["results"]:
+        name = re.sub(r"\s+(Tm|Er|Xr)$", "", row["term"].strip().title())
+        if name.lower() not in {n.lower() for n in names}:
+            names.append(name)
+    return names
+
+
+def is_generic(name: str, drug: str) -> bool:
+    low = name.lower()
+    return drug in low or low in {"morning after", "morning after pill", "afterpill"} or low.endswith(" morning after pill")
 
 
 def main() -> None:
@@ -44,7 +63,16 @@ def main() -> None:
             for k, chunk in enumerate(chunk_words(text)[:CHUNKS_PER_SECTION]):
                 rows.append({"id": f"fdax:{drug}:{section}:{k}", "title": f"{drug.title()}: {SECTION_TITLES[section]}",
                              "text": chunk, "source": f"openFDA ({note})", "url": url})
-        print(drug, label.get("openfda", {}).get("brand_name"), label.get("openfda", {}).get("generic_name"))
+        brands = [b for b in brand_names(search) if not is_generic(b, drug)][:MAX_BRANDS]
+        if brands:
+            rows.append({
+                "id": f"fdax:{drug}:examples:0", "title": f"{drug.title()}: Examples",
+                "text": (f"Examples of {drug} products ({note}) on US FDA labels: {', '.join(brands)}. "
+                         f"Brand names differ between countries; ask a pharmacist which {drug} products are "
+                         "registered in Rwanda."),
+                "source": f"openFDA ({note})", "url": "https://open.fda.gov/apis/drug/label/",
+            })
+        print(drug, label.get("openfda", {}).get("brand_name"), "| brands:", brands)
     OUT.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
     print(f"{len(rows)} passages -> {OUT}")
     embed()

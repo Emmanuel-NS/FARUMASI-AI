@@ -25,6 +25,17 @@ SMALL_TALK = [
      "give first advice for minor health problems. I don't replace a pharmacist or doctor."),
 ]
 
+# Complaints and insults are feedback about the assistant, not health questions.
+FEEDBACK = re.compile(
+    r"\b(you('re| are)? (so )?(stupid|dumb|useless|bad|wrong|not helping|repeating)|you keep (saying|repeating|giving)"
+    r"|same (thing|answer)s?( again)?|not helpful|doesn'?t help|this is (useless|wrong|bad)|idiot|nonsense)\b", re.I)
+FEEDBACK_REPLY = (
+    "Sorry that wasn't helpful. My answers are taken from short sections of official medicine leaflets, so a vague "
+    "follow-up can bring back the same section. You can ask for one part at a time (\"how do I take it?\", \"side "
+    "effects?\", \"who should not take it?\", \"examples?\") or ask for \"full details about <medicine name>\" to get "
+    "several sections together."
+)
+
 # Everyday and brand names used in Rwandan pharmacies -> the names the corpus is indexed under.
 LAY_TERMS = [
     (r"after[- ]?sex pills?|morning[- ]after pills?|emergency (contracepti\w+|pills?)|postinor|plan b|\bp2\b|\be-?pill",
@@ -57,13 +68,13 @@ ASPECTS = [
     (r"side[- ]?effects?|adverse|reactions?", {"Side effects"}),
     (r"\bdos(e|es|age|ing)\b|how (much|many|often)|how to (take|use)|how (should|do|can|must) (i|you|we) (take|use)"
      r"|when (should|do) (i|you) take|\bper day\b|a day\b", {"Dosage", "How to take"}),
-    (r"used for|\buses?\b|what is .* for|treat|indicat|know (more )?about|tell me about|information (on|about)|how does .* work",
-     {"Uses", "Purpose"}),
+    (r"used for|\buses?\b|what is .* for|treat|indicat|how does .* work|what do(es)? (it|they) do", {"Uses", "Purpose"}),
     (r"pregnan|breast[- ]?feed", {"Pregnancy", "Pregnancy and breastfeeding"}),
     (r"interact|together with|\bwith (alcohol|other)|mix", {"Interactions"}),
     (r"stor(e|age)|keep|fridge", {"Storage"}),
     (r"overdose|too (much|many)|swallowed", {"Overdose"}),
     (r"food|empty stomach|meal|before (i|you) take|should not take|who can", {"Before you take", "How to take", "Dosage"}),
+    (r"examples?|brands?|names? of|which (ones|pills|products|brands)|what (pills|brands|products)", {"Examples"}),
 ]
 _ASPECTS = [(re.compile(p, re.I), names) for p, names in ASPECTS]
 
@@ -72,6 +83,8 @@ _NOT_DRUG_NAMES = {"compound", "candid", "insulin", "salt", "spacer", "troop", "
 
 def small_talk(text: str) -> str | None:
     t = text.strip()
+    if FEEDBACK.search(t) and len(t) < 80:
+        return FEEDBACK_REPLY
     if len(t) > 40:
         return None
     for pattern, reply in SMALL_TALK:
@@ -81,23 +94,37 @@ def small_talk(text: str) -> str | None:
 
 
 _FOLLOW_UP = re.compile(
-    r"\b(those|these|they|them|it|its|this|that|their|same|more|examples?|other ones?|which ones?|what about|and if)\b", re.I)
-MAX_CONTEXT_WORDS = 30
-
-
-def resolve_follow_up(question: str, previous: str | None, has_own_topic) -> str:
-    """Attach the previous question's subject to a follow-up such as "what do they do?".
-
-    Only short questions with a pronoun / "more" / "examples" that name no medicine or known lay term
-    of their own are treated as follow-ups; anything else starts a new topic.
-    """
-    if not previous or len(question.split()) > 15 or not _FOLLOW_UP.search(question) or has_own_topic(question):
-        return question
-    context = " ".join(previous.split()[-MAX_CONTEXT_WORDS:])
-    return f"{question}{FOLLOW_UP_MARK}{context})"
-
-
+    r"\b(those|these|they|them|it|its|this|that|their|more|examples?|other ones?|which ones?|what about|and if"
+    r"|details?|detailed|full|info|information|everything|explain)\b", re.I)
+_DETAIL = re.compile(r"\b(more|details?|detailed|full|complete|everything|all about|in depth|elaborate|explain|info|information"
+                     r"|tell me about|know about)\b", re.I)
+MAX_FOLLOW_UP_WORDS = 15
 FOLLOW_UP_MARK = " (about: "
+
+
+def is_follow_up(question: str, has_own_topic) -> bool:
+    """Short questions with a pronoun / "more" / "examples" that name no medicine or known lay term of their own."""
+    return len(question.split()) <= MAX_FOLLOW_UP_WORDS and bool(_FOLLOW_UP.search(question)) and not has_own_topic(question)
+
+
+def asks_section(question: str, section: str | None = None) -> bool:
+    found = _sections(question)
+    return section in found if section else bool(found)
+
+
+_STRONG_DETAIL = re.compile(r"\b(full|detailed|details|everything|complete|in depth)\b", re.I)
+
+
+def wants_detail(question: str) -> bool:
+    """"Full and detailed answer", or "tell me more" with no specific section asked for."""
+    return bool(_STRONG_DETAIL.search(question)) or (bool(_DETAIL.search(question)) and not asks_section(question))
+
+
+def resolve_follow_up(question: str, topic: str | None, has_own_topic) -> str:
+    """Attach the subject of the conversation (the last non-follow-up question) to a follow-up."""
+    if not topic or not is_follow_up(question, has_own_topic):
+        return question
+    return f"{question}{FOLLOW_UP_MARK}{topic})"
 
 
 def _sections(text: str) -> set[str]:

@@ -23,8 +23,8 @@ from pharmqa.config import (CORPUS_EMB_PATH, GENERATOR_ADAPTER_DIR, GENERATOR_BA
                             INTENT_MODEL_DIR, INTENT_TFIDF_PATH, RETRIEVER_BASE_MODEL, RETRIEVER_MODEL_DIR,
                             SUPPLEMENTARY_EMB_PATH, SUPPLEMENTARY_PATH)
 from pharmqa.generation.common import build_prompt, extractive_answer
-from pharmqa.query import (QueryAnalyzer, clean_passage, drug_of, expand, is_stub, resolve_follow_up,
-                           section_of, small_talk)
+from pharmqa.query import (QueryAnalyzer, asks_section, clean_passage, drug_of, expand, is_follow_up, is_stub,
+                           resolve_follow_up, section_of, small_talk, wants_detail)
 from pharmqa.retrieval.common import load_corpus
 
 OOD_REPLY = (
@@ -38,6 +38,31 @@ LOW_CONFIDENCE_REPLY = (
 MIN_RETRIEVAL_SIM = 0.35  # below this cosine similarity the top passage is unlikely to be relevant
 CANDIDATES = 50           # dense hits re-ranked by the medicine / section the question names
 DRUG_BOOST, SECTION_BOOST = 0.15, 0.08
+# Sections combined into a fuller answer when the user asks for more detail, in order; each "tell me
+# more" adds the next sections not shown yet.
+OVERVIEW = [
+    ("What it is for", {"Uses", "Purpose"}),
+    ("How to take it", {"Dosage", "How to take", "Directions"}),
+    ("Who should not take it", {"Do not use", "Contraindications", "Before you take"}),
+    ("Possible side effects", {"Side effects", "When using"}),
+    ("Examples", {"Examples"}),
+    ("Warnings", {"Warnings", "Boxed warning"}),
+    ("Ask a doctor or pharmacist first if", {"Ask a doctor or pharmacist", "Ask a doctor"}),
+    ("Other medicines", {"Interactions"}),
+    ("Pregnancy and breastfeeding", {"Pregnancy", "Pregnancy and breastfeeding"}),
+    ("If you take too much", {"Overdose"}),
+    ("Storage", {"Storage"}),
+]
+OVERVIEW_PARTS = 5
+NOTHING_MORE_REPLY = (
+    "That is everything my sources say about {drug}. For anything else (for example which brands are sold "
+    "near you, or whether it suits you personally), please ask a pharmacist."
+)
+
+
+def _already_said(answer: str, previous_answers) -> bool:
+    key = " ".join(answer.lower().split())[:80]
+    return bool(key) and any(key in " ".join(p.lower().split()) for p in previous_answers)
 
 
 @dataclass
@@ -130,12 +155,8 @@ class PharmacistAssistant:
         classes = list(self.intent_model.classes_)
         return classes[int(probs.argmax())], float(probs.max())
 
-    def retrieve(self, text: str, k: int = 3) -> list[dict]:
-        """Dense retrieval, then passages about the medicine and section the question names move up.
-
-        `score` stays the raw cosine similarity (used for the confidence threshold); `on_topic` marks
-        passages about a medicine named in the question.
-        """
+    def _rank(self, text: str):
+        """Dense retrieval, then passages about the medicine and section the question names move up."""
         expanded = expand(text)
         focus = self.analyzer.focus(expanded)
         q = self.retriever.encode([expanded], normalize_embeddings=True)[0]
@@ -150,10 +171,41 @@ class PharmacistAssistant:
             on_drug = self.drugs[i] in focus.drugs
             return sims[i] + DRUG_BOOST * on_drug + SECTION_BOOST * (on_drug and section_of(self.titles[i]) in focus.sections)
 
-        top = sorted(cand, key=boosted, reverse=True)[:k]
+        return focus, sims, sorted(cand, key=boosted, reverse=True)
+
+    def _hit(self, i: int, sims, focus) -> dict:
+        """`score` stays the raw cosine similarity (used for the confidence threshold); `on_topic` marks
+        passages about a medicine named in the question."""
         cols = [c for c in ("id", "title", "text", "source", "full", "url") if c in self.corpus]
-        return [{**self.corpus.iloc[i][cols].to_dict(), "score": float(sims[i]),
-                 "on_topic": self.drugs[i] in focus.drugs} for i in top]
+        return {**self.corpus.iloc[i][cols].to_dict(), "score": float(sims[i]), "on_topic": self.drugs[i] in focus.drugs}
+
+    def retrieve(self, text: str, k: int = 3) -> list[dict]:
+        focus, sims, order = self._rank(text)
+        return [self._hit(i, sims, focus) for i in order[:k]]
+
+    def overview(self, text: str, previous_answers=()) -> tuple[str, list[dict]] | None:
+        """A fuller answer for "tell me more": one short answer per leaflet section, skipping sections
+        already given earlier in the conversation."""
+        focus, sims, order = self._rank(text)
+        if not focus.drugs:
+            return None
+        parts, hits, drug = [], [], None
+        for heading, sections in OVERVIEW:
+            if len(parts) == OVERVIEW_PARTS:
+                break
+            i = next((i for i in order if self.drugs[i] in focus.drugs and section_of(self.titles[i]) in sections), None)
+            if i is None:
+                continue
+            hit, drug = self._hit(i, sims, focus), self.drugs[i]
+            body = clean_passage(hit["full"]).partition(". ")[2] if heading == "Examples" else self.generate(f"{heading} ({drug})?", [hit["full"]])
+            body = safety.localize(body)
+            if _already_said(body, previous_answers):
+                continue
+            parts.append(f"**{heading}:** {body}")
+            hits.append(hit)
+        if not parts:
+            return (NOTHING_MORE_REPLY.format(drug=drug), []) if drug else None
+        return "\n\n".join(parts), hits
 
     @torch.no_grad()
     def generate(self, question: str, passages: list[str]) -> str:
@@ -167,15 +219,16 @@ class PharmacistAssistant:
 
     # Public API ------------------------------------------------------------------
     def resolve(self, question: str, earlier: list[str]) -> str:
-        """Carry the subject of earlier user turns into follow-ups ("what do they do?")."""
-        context = None
+        """Attach the conversation's subject (the last user message that was not a follow-up, greeting or
+        complaint) to a follow-up such as "what do they do?"."""
+        topic = None
         for msg in earlier:
-            if not small_talk(msg):
-                context = resolve_follow_up(msg, context, self.analyzer.has_own_topic)
-        return resolve_follow_up(question, context, self.analyzer.has_own_topic)
+            if not small_talk(msg) and not is_follow_up(msg, self.analyzer.has_own_topic):
+                topic = msg
+        return resolve_follow_up(question, topic, self.analyzer.has_own_topic)
 
-    def answer(self, question: str, earlier: list[str] | tuple = ()) -> Result:
-        """`earlier` = the user's previous messages in this conversation, oldest first."""
+    def answer(self, question: str, earlier: list[str] | tuple = (), previous_answers: list[str] | tuple = ()) -> Result:
+        """`earlier` / `previous_answers` = the user's and the assistant's previous messages, oldest first."""
         components = {"intent_model": self.intent_kind, "retriever": self.retriever_kind,
                       "generator": self.gen[2] if self.gen else "extractive"}
         chat_reply = small_talk(question)
@@ -189,14 +242,26 @@ class PharmacistAssistant:
         if intent == "out_of_domain" and risk.level != "emergency":
             return Result(question, intent, conf, risk.level, OOD_REPLY, components=components, interpreted=q)
 
-        hits = self.retrieve(q)
-        if hits[0]["score"] < MIN_RETRIEVAL_SIM:
-            answer = LOW_CONFIDENCE_REPLY
+        overview = self.overview(q, previous_answers) if wants_detail(question) else None
+        if overview:
+            answer, hits = overview
         else:
-            # When the question names a medicine, read only passages about it, so the reader cannot copy
-            # a neighbouring drug's label (e.g. metoclopramide when asked about metformin).
-            context = [h for h in hits if h["on_topic"]] or hits
-            answer = safety.localize(self.generate(q, [h["full"] for h in context]))
+            hits = self.retrieve(q)
+            if hits[0]["score"] < MIN_RETRIEVAL_SIM and not hits[0]["on_topic"]:
+                answer = LOW_CONFIDENCE_REPLY
+            else:
+                # When the question names a medicine, read only passages about it, so the reader cannot copy
+                # a neighbouring drug's label (e.g. metoclopramide when asked about metformin).
+                context = [h for h in hits if h["on_topic"]] or hits
+                examples = next((h for h in context if section_of(h["title"]) == "Examples"), None)
+                if examples and asks_section(question, "Examples"):
+                    answer = examples["text"]  # a brand-name list: the reader would only shorten or skip it
+                else:
+                    answer = safety.localize(self.generate(q, [h["full"] for h in context]))
+                # A vague follow-up that brings back an earlier answer gets the sections not shown yet.
+                if (_already_said(answer, previous_answers) and not asks_section(question)
+                        and (overview := self.overview(q, previous_answers))):
+                    answer, hits = overview
         sources = [{"title": h["title"], "source": h["source"], "score": round(h["score"], 3), "text": h["text"],
                     "url": h.get("url") if isinstance(h.get("url"), str) else None} for h in hits]
         return Result(question, intent, conf, risk.level, answer, risk.warnings() + [safety.DISCLAIMER], sources,

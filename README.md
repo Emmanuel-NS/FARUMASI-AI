@@ -159,7 +159,8 @@ without retraining any model, so the tables above are unchanged.
 The original download picked, for each medicine, the openFDA label with the most patient
 sections, which sometimes selected a combination product. `scripts/fetch_supplementary.py`
 fetches the correct single-product labels (`data/external/supplementary_labels.jsonl`); the app
-swaps them in at start-up and embeds them with the trained retriever. Label cross-references
+swaps them in at start-up, using embeddings precomputed with the trained retriever
+(`artifacts/supplementary_embeddings.npy`; ZeroGPU Spaces must not run models at start-up). Label cross-references
 ("[see Warnings and Precautions (5.1)]") and US adverse-event reporting boilerplate are removed
 before the reader sees a passage. `scripts/smoke_questions.py` reruns these messages end to end.
 

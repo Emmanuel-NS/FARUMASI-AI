@@ -63,7 +63,7 @@ def main() -> None:
         shutil.copy(ROOT / "data" / "external" / "supplementary_labels.jsonl", dst / "data" / "external")
         art = ROOT / "artifacts"
         for item in ("intent_distilbert", "retriever_minilm_ft", "generator_flant5_lora",
-                     "corpus_embeddings.npy", "intent_tfidf.joblib"):
+                     "corpus_embeddings.npy", "supplementary_embeddings.npy", "intent_tfidf.joblib"):
             src = art / item
             if src.is_dir():
                 shutil.copytree(src, dst / "artifacts" / item, ignore=shutil.ignore_patterns("checkpoints"))

@@ -21,7 +21,7 @@ import torch
 from pharmqa import safety
 from pharmqa.config import (CORPUS_EMB_PATH, GENERATOR_ADAPTER_DIR, GENERATOR_BASE_MODEL, INTENT_LABELS,
                             INTENT_MODEL_DIR, INTENT_TFIDF_PATH, RETRIEVER_BASE_MODEL, RETRIEVER_MODEL_DIR,
-                            SUPPLEMENTARY_PATH)
+                            SUPPLEMENTARY_EMB_PATH, SUPPLEMENTARY_PATH)
 from pharmqa.generation.common import build_prompt, extractive_answer
 from pharmqa.query import QueryAnalyzer, clean_passage, drug_of, expand, section_of, small_talk
 from pharmqa.retrieval.common import load_corpus
@@ -92,7 +92,11 @@ class PharmacistAssistant:
         extra["full"] = extra["title"] + ". " + extra["text"]
         replaced = set(extra["title"].map(drug_of))
         keep = ~(self.corpus["source"].eq("openFDA") & self.corpus["title"].fillna("").map(drug_of).isin(replaced))
-        extra_emb = self.retriever.encode(extra["full"].tolist(), batch_size=64, normalize_embeddings=True)
+        # Precomputed by scripts/fetch_supplementary.py: on ZeroGPU any model compute at start-up breaks GPU workers.
+        if SUPPLEMENTARY_EMB_PATH.exists() and self.retriever_kind == "minilm_finetuned":
+            extra_emb = np.load(SUPPLEMENTARY_EMB_PATH)
+        else:
+            extra_emb = self.retriever.encode(extra["full"].tolist(), batch_size=64, normalize_embeddings=True)
         self.corpus = pd.concat([self.corpus[keep], extra], ignore_index=True)
         self.emb = np.vstack([self.emb[keep.to_numpy()], extra_emb])
 

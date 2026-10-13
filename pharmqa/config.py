@@ -30,3 +30,4 @@ CORPUS_EMB_PATH = ARTIFACTS / "corpus_embeddings.npy"
 
 # Corrected openFDA labels added to the app's corpus at start-up (scripts/fetch_supplementary.py).
 SUPPLEMENTARY_PATH = DATA / "external" / "supplementary_labels.jsonl"
+SUPPLEMENTARY_EMB_PATH = ARTIFACTS / "supplementary_embeddings.npy"

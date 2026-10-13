@@ -53,7 +53,8 @@ _LAY = [(re.compile(p, re.I), rep) for p, rep in LAY_TERMS]
 ASPECTS = [
     (r"side[- ]?effects?|adverse|reactions?", {"Side effects"}),
     (r"\bdos(e|es|age|ing)\b|how (much|many|often)|how to (take|use)|\bper day\b|a day\b", {"Dosage", "How to take"}),
-    (r"used for|\buses?\b|what is .* for|treat|indicat", {"Uses", "Purpose"}),
+    (r"used for|\buses?\b|what is .* for|treat|indicat|know (more )?about|tell me about|information (on|about)|how does .* work",
+     {"Uses", "Purpose"}),
     (r"pregnan|breast[- ]?feed", {"Pregnancy", "Pregnancy and breastfeeding"}),
     (r"interact|together with|\bwith (alcohol|other)|mix", {"Interactions"}),
     (r"stor(e|age)|keep|fridge", {"Storage"}),

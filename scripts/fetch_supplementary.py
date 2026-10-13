@@ -6,7 +6,8 @@ levonorgestrel -> a daily combined pill instead of the morning-after pill). Thes
 appended to the corpus at app start-up and embedded with the trained retriever; no model is
 retrained and the evaluation corpus is unchanged.
 
-Usage:  python scripts/fetch_supplementary.py
+Usage:  python scripts/fetch_supplementary.py            (fetch + embed)
+        python scripts/fetch_supplementary.py --embed    (re-embed after retraining the retriever)
 """
 from __future__ import annotations
 
@@ -14,11 +15,9 @@ import json
 
 import requests
 
-from pharmqa.config import DATA
+from pharmqa.config import RETRIEVER_MODEL_DIR, SUPPLEMENTARY_EMB_PATH, SUPPLEMENTARY_PATH as OUT
 from pharmqa.data.download import OPENFDA_URL, PATIENT_SECTIONS
 from pharmqa.data.prepare import CHUNKS_PER_SECTION, SECTION_TITLES, chunk_words, clean
-
-OUT = DATA / "external" / "supplementary_labels.jsonl"
 
 # (corpus drug name, display note, openFDA search)
 LABELS = [
@@ -48,7 +47,22 @@ def main() -> None:
         print(drug, label.get("openfda", {}).get("brand_name"), label.get("openfda", {}).get("generic_name"))
     OUT.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
     print(f"{len(rows)} passages -> {OUT}")
+    embed()
+
+
+def embed() -> None:
+    """Embed the passages with the fine-tuned retriever, so the app does no model compute at start-up."""
+    import numpy as np
+    from sentence_transformers import SentenceTransformer
+
+    rows = [json.loads(line) for line in OUT.open(encoding="utf-8")]
+    model = SentenceTransformer(str(RETRIEVER_MODEL_DIR), device="cpu")
+    emb = model.encode([f"{r['title']}. {r['text']}" for r in rows], batch_size=64, normalize_embeddings=True)
+    np.save(SUPPLEMENTARY_EMB_PATH, emb)
+    print(f"embeddings {emb.shape} -> {SUPPLEMENTARY_EMB_PATH}")
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    embed() if "--embed" in sys.argv else main()

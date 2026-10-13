@@ -16,9 +16,12 @@ from __future__ import annotations
 import argparse
 import random
 
+import os
+
 from pharmqa.compat import alias_renamed_seq2seq_methods, hide_incompatible_torchao
 
 hide_incompatible_torchao()
+os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 
 import torch  # noqa: E402
 from datasets import Dataset  # noqa: E402
@@ -39,7 +42,10 @@ def main() -> None:
     ap.add_argument("--epochs", type=float, default=3)
     ap.add_argument("--lr", type=float, default=3e-4)
     ap.add_argument("--rank", type=int, default=16)
-    ap.add_argument("--batch", type=int, default=16)
+    # 16 x 512-token sequences in fp32 overflow a 15 GB T4 (no bf16 there), so the default is
+    # 4 per step with 4 accumulation steps: same effective batch of 16.
+    ap.add_argument("--batch", type=int, default=4)
+    ap.add_argument("--grad_accum", type=int, default=4)
     ap.add_argument("--max_train", type=int, default=0, help="subsample training pairs (0 = all)")
     ap.add_argument("--max_val", type=int, default=400)
     ap.add_argument("--out", default=str(GENERATOR_ADAPTER_DIR))
@@ -86,8 +92,9 @@ def main() -> None:
         model=model,
         args=Seq2SeqTrainingArguments(
             output_dir=f"{args.out}/checkpoints", num_train_epochs=args.epochs, learning_rate=args.lr,
-            per_device_train_batch_size=args.batch, per_device_eval_batch_size=args.batch,
-            warmup_steps=int(0.05 * args.epochs * len(train_ds) / args.batch), weight_decay=0.01, eval_strategy="epoch", save_strategy="epoch",
+            per_device_train_batch_size=args.batch, per_device_eval_batch_size=2 * args.batch,
+            gradient_accumulation_steps=args.grad_accum,
+            warmup_steps=int(0.05 * args.epochs * len(train_ds) / (args.batch * args.grad_accum)), weight_decay=0.01, eval_strategy="epoch", save_strategy="epoch",
             load_best_model_at_end=True, metric_for_best_model="eval_loss", save_total_limit=1,
             logging_steps=50, report_to="none", seed=SEED,
             bf16=torch.cuda.is_available() and torch.cuda.is_bf16_supported(),

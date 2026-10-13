@@ -1,12 +1,15 @@
 # Training, evaluation and the web app (Python 3.10+).
 # On Colab, torch is preinstalled with CUDA; locally install the build for your machine.
+# The Hugging Face stack is pinned to the versions the pipeline was tested with: Colab's
+# preinstalled versions drift and have broken LoRA training twice (torchao, renamed T5 method).
 torch>=2.2
-transformers>=4.44
-datasets>=2.20
-sentence-transformers>=3.1
-peft>=0.21  # older peft calls a T5 method that transformers 5 renamed
-accelerate>=0.33
-evaluate>=0.4
+transformers==5.19.0
+tokenizers==0.23.2
+datasets==5.0.0
+sentence-transformers==6.1.0
+peft==0.21.2
+accelerate==1.15.0
+evaluate==0.4.6
 rouge-score>=0.1.2
 bert-score>=0.3.13
 rank-bm25>=0.2.2

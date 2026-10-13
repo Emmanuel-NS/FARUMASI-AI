@@ -86,7 +86,8 @@ class PharmacistAssistant:
             hide_incompatible_torchao()
             alias_renamed_seq2seq_methods(model)
             from peft import PeftModel
-            model = PeftModel.from_pretrained(model, str(GENERATOR_ADAPTER_DIR)).merge_and_unload()
+            # Load adapter weights on CPU: on ZeroGPU no GPU is attached at startup, only inside spaces.GPU calls.
+            model = PeftModel.from_pretrained(model, str(GENERATOR_ADAPTER_DIR), torch_device="cpu").merge_and_unload()
             kind = "flan_t5_lora"
         return tok, model.to(self.device).eval(), kind
 

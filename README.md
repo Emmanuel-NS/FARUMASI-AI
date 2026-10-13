@@ -7,7 +7,7 @@ recognising questions outside its scope and flagging risky situations.
 
 | | |
 |---|---|
-| **Live system** | `https://huggingface.co/spaces/<your-hf-username>/farumasi-pharmacist-qa` (add after deploying) |
+| **Live system** | [huggingface.co/spaces/Emmanuel-NS/farumasi-pharmacist-qa](https://huggingface.co/spaces/Emmanuel-NS/farumasi-pharmacist-qa) |
 | **Demo video** | `<link>` |
 | **Report** | `<link to PDF>` |
 
@@ -158,7 +158,7 @@ python -m pharmqa.generation.train_lora --epochs 2 --max_train 4000   # settings
 python -m pharmqa.generation.evaluate --system lora --context retrieved
 python -m pharmqa.report_tables
 python app.py                          # local web app
-python scripts/deploy_space.py --space Emmanuel-NS/farumasi-pharmacist-qa
+python scripts/deploy_space.py --space Emmanuel-NS/farumasi-pharmacist-qa   # needs HF_TOKEN; Space on free ZeroGPU hardware
 ```
 
 ## Repository layout

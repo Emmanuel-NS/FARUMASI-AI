@@ -40,6 +40,7 @@ tokenizers==0.23.2
 sentence-transformers==6.1.0
 peft==0.21.2
 accelerate==1.15.0
+pydantic==2.10.6
 scikit-learn>=1.4
 pandas>=2.1
 rank-bm25>=0.2.2

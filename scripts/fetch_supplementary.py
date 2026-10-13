@@ -2,7 +2,8 @@
 
 The main download keeps, per medicine, the openFDA label with the richest patient sections. For a
 few medicines that picks the wrong product (metformin -> a sitagliptin/metformin combination;
-levonorgestrel -> a daily combined pill instead of the morning-after pill). These passages are
+levonorgestrel -> a daily combined pill instead of the morning-after pill), and ulipristal (the
+emergency pill that works up to 120 hours after sex) was missing. These passages are
 appended to the corpus at app start-up and embedded with the trained retriever; no model is
 retrained and the evaluation corpus is unchanged. For the same medicines an "Examples" passage
 lists brand names found on US FDA labels, so "examples of those pills" can be answered.
@@ -27,6 +28,8 @@ LABELS = [
      'openfda.generic_name:"levonorgestrel" AND openfda.product_type:"HUMAN OTC DRUG"'),
     ("metformin", "single-ingredient tablets",
      'openfda.generic_name.exact:"METFORMIN HYDROCHLORIDE" AND _exists_:adverse_reactions'),
+    ("ulipristal", "emergency contraceptive for up to 120 hours (5 days) after sex",
+     'openfda.generic_name:"ulipristal"'),
 ]
 MAX_BRANDS = 12
 
@@ -68,8 +71,9 @@ def main() -> None:
             rows.append({
                 "id": f"fdax:{drug}:examples:0", "title": f"{drug.title()}: Examples",
                 "text": (f"Examples of {drug} products ({note}) on US FDA labels: {', '.join(brands)}. "
-                         f"Brand names differ between countries; ask a pharmacist which {drug} products are "
-                         "registered in Rwanda."),
+                         "Brand names differ between countries, and these sources do not include a list of "
+                         f"products registered in Rwanda; ask a pharmacist which {drug} products are available "
+                         "near you."),
                 "source": f"openFDA ({note})", "url": "https://open.fda.gov/apis/drug/label/",
             })
         print(drug, label.get("openfda", {}).get("brand_name"), "| brands:", brands)

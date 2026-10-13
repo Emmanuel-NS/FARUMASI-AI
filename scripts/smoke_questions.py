@@ -35,6 +35,10 @@ CONVERSATION = [
     "what do they do?",
     "What are the side effects of metformin?",
     "and how should I take it?",
+    "need to know about after sex pills",
+    "i need to examples of those ones that i can even find in rwanda",
+    "okay, are their any of 120hrs, becouse i have already passed 72hrs",
+    "you not answering what i asked you?",
 ]
 
 

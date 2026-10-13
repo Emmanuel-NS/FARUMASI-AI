@@ -28,7 +28,8 @@ SMALL_TALK = [
 # Complaints and insults are feedback about the assistant, not health questions.
 FEEDBACK = re.compile(
     r"\b(you('re| are)? (so )?(stupid|dumb|useless|bad|wrong|not helping|repeating)|you keep (saying|repeating|giving)"
-    r"|same (thing|answer)s?( again)?|not helpful|doesn'?t help|this is (useless|wrong|bad)|idiot|nonsense)\b", re.I)
+    r"|you('re| are)? not answer\w*|(didn'?t|did not|don'?t|do not|never) answer\w*|not what i asked"
+    r"|answer (what|my question)|same (thing|answer)s?( again)?|not helpful|doesn'?t help|this is (useless|wrong|bad)|idiot|nonsense)\b", re.I)
 FEEDBACK_REPLY = (
     "Sorry that wasn't helpful. My answers are taken from short sections of official medicine leaflets, so a vague "
     "follow-up can bring back the same section. You can ask for one part at a time (\"how do I take it?\", \"side "
@@ -40,6 +41,8 @@ FEEDBACK_REPLY = (
 LAY_TERMS = [
     (r"after[- ]?sex pills?|morning[- ]after pills?|emergency (contracepti\w+|pills?)|postinor|plan b|\bp2\b|\be-?pill",
      "levonorgestrel emergency contraception"),
+    (r"\b120 ?h(ou)?rs?\b|\b(5|five) days\b|\b(passed|after|more than|over|beyond|past) (the )?72|\bella(one)?\b|ulipristal",
+     "ulipristal emergency contraception up to 120 hours"),
     (r"family planning|birth control pills?|contraceptive pills?|the pill\b", "contraception birth control"),
     (r"(before|during) sex\b.*(exp\w*(?:ence|ance)\b|perform|last longer|stamina|enjoy|strong|hard)|sex(ual)? (enhancement|performance|power|stamina)"
      r"|erect\w*|impoten\w*|last longer in bed|viagra",

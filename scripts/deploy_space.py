@@ -62,7 +62,7 @@ def main() -> None:
         (dst / "data" / "external").mkdir(parents=True)
         shutil.copy(ROOT / "data" / "external" / "supplementary_labels.jsonl", dst / "data" / "external")
         art = ROOT / "artifacts"
-        for item in ("intent_distilbert", "retriever_minilm_ft", "generator_flant5_lora",
+        for item in ("intent_distilbert", "retriever_minilm_ft", "generator_flant5_lora", "generator_qwen_lora",
                      "corpus_embeddings.npy", "supplementary_embeddings.npy", "intent_tfidf.joblib"):
             src = art / item
             if src.is_dir():

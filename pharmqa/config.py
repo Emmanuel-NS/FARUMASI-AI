@@ -20,12 +20,14 @@ INTENT_LABELS = ["medicine_info", "condition_advice", "out_of_domain"]
 INTENT_BASE_MODEL = "distilbert-base-uncased"
 RETRIEVER_BASE_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 GENERATOR_BASE_MODEL = "google/flan-t5-base"
+CHAT_BASE_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"
 
 # Artifact locations produced by training.
 INTENT_TFIDF_PATH = ARTIFACTS / "intent_tfidf.joblib"
 INTENT_MODEL_DIR = ARTIFACTS / "intent_distilbert"
 RETRIEVER_MODEL_DIR = ARTIFACTS / "retriever_minilm_ft"
 GENERATOR_ADAPTER_DIR = ARTIFACTS / "generator_flant5_lora"
+CHAT_ADAPTER_DIR = ARTIFACTS / "generator_qwen_lora"
 CORPUS_EMB_PATH = ARTIFACTS / "corpus_embeddings.npy"
 
 # Corrected openFDA labels added to the app's corpus at start-up (scripts/fetch_supplementary.py).

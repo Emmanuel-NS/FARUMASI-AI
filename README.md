@@ -31,7 +31,8 @@ question ─► risk detector (rules) ──────────────
          └► greeting? (rules) ──► short introduction
          └► intent classifier (DistilBERT) ─► out of scope? ──► polite refusal
                                             └► retriever (fine-tuned MiniLM) ─► top-3 passages
-                                                  └► reader (Flan-T5-base + LoRA) ─► short answer
+                                                  └► reader (Qwen2.5-1.5B-Instruct + LoRA;
+                                                             Flan-T5-base + LoRA fallback) ─► answer
 answer + warnings + sources + disclaimer ─► Gradio web app
 ```
 
@@ -39,7 +40,7 @@ answer + warnings + sources + disclaimer ─► Gradio web app
 |---|---|---|
 | Intent / scope classifier (3 classes) | TF-IDF + logistic regression | DistilBERT fine-tuned, + real patient-question augmentation |
 | Retriever | BM25 | all-MiniLM-L6-v2 fine-tuned with in-batch negatives; hybrid BM25 + dense (RRF) |
-| Answer generation | Extractive (first sentences of top passage); Flan-T5 zero-shot | Flan-T5-base + LoRA reader trained with hard negatives |
+| Answer generation | Extractive (first sentences of top passage); Flan-T5 zero-shot; Qwen2.5-1.5B-Instruct zero-shot | Flan-T5-base + LoRA reader trained with hard negatives; Qwen2.5-1.5B-Instruct + LoRA chat reader (pharmacist-style answers, overviews, abstaining) |
 | Risk detector | | Transparent rules (emergency, special populations, prescription-only) |
 
 Design decision: the assistant **answers** risky questions but always adds a warning; for
@@ -142,6 +143,25 @@ so copying the gold passage reproduces them almost exactly.
   still returned "I couldn't find reliable information". US label text can mention US-only
   services (Poison Control 1-800-222-1222); answers are post-processed to point to 912 instead.
 
+### Chat reader (Qwen2.5-1.5B-Instruct + LoRA)
+
+The Flan-T5 reader copies the first sentences of a passage, so answers start mid-leaflet ("Use For
+women to ...") and it cannot say that the passages do not answer the question. The chat reader
+fine-tunes Qwen2.5-1.5B-Instruct (Qwen Team, 2024) with LoRA (r=16 on attention and MLP
+projections, ~1% of parameters, fp16, 1 epoch, Colab T4) on targets built from the same grounded
+QA pairs, no external LLM (`pharmqa/generation/chat_common.py`):
+
+- **answer**: question + gold passage + 2 hard negatives → a direct opening sentence chosen by the
+  question type ("Metformin can cause side effects.") + the cleaned gold passage;
+- **overview**: "tell me everything about X" + 3–5 sections of X → a headed multi-section answer;
+- **no answer** (~8%): question + 3 passages about other topics → "my sources don't cover this".
+
+The loss is on the answer tokens only. `pharmqa/generation/evaluate_chat.py` reports ROUGE-L
+(F1 and recall), BERTScore, *support* (share of answer content words found in the passages, a
+groundedness proxy) and abstention on unrelated passages. The app uses the chat reader when its
+adapter is present and falls back to Flan-T5 + LoRA otherwise (`FARUMASI_READER=flan` forces it).
+Train and evaluate with `notebooks/train_chat_reader_colab.ipynb`.
+
 ### Fixes from testing the live app
 
 Testing the deployed app with realistic patient messages exposed failures the benchmark did not
@@ -160,6 +180,9 @@ without retraining any model, so the tables above are unchanged.
 | "can I get some examples of those pills" | No information | No brand names in the corpus | "Examples" passages built from brand names on US FDA labels, with a note that Rwandan brands differ |
 | "you keep saying same things", "you're stupid" | Treated as a follow-up / out-of-scope refusal | No handling of feedback | Polite reply explaining how to ask for one section or for full details |
 | "which pills before sex to get the best experience" | Menopause hormone therapy text | Lay wording (and a typo) matched nothing | Lay-term rule → erectile dysfunction / sexual problems in men (NIH passages that advise seeing a doctor) |
+| "are there any of 120hrs, I already passed 72hrs" | Warnings and storage of the morning-after pill | No ulipristal label in the corpus; the repeat check turned the specific question into an overview | Ulipristal (ella, up to 120 hours) label + lay terms ("120 hours", "5 days", "passed 72"); the overview fallback only fires for vague follow-ups |
+| "examples that I can find in Rwanda" | The US brand list as if it applied to Rwanda | No Rwandan emergency-contraceptive leaflet | The examples passage states that the sources have no list of products registered in Rwanda |
+| "you not answering what I asked you?" | "I couldn't find reliable information" | Complaint not recognised | Added to the feedback rule |
 
 The original download picked, for each medicine, the openFDA label with the most patient
 sections, which sometimes selected a combination product. `scripts/fetch_supplementary.py`
@@ -184,6 +207,8 @@ python -m pharmqa.intent.transformer --train_file train_consumer
 python -m pharmqa.retrieval.dense --mode all
 python -m pharmqa.generation.train_lora --epochs 2 --max_train 4000   # settings behind the reported results
 python -m pharmqa.generation.evaluate --system lora --context retrieved
+python -m pharmqa.generation.train_chat_lora --epochs 1 --max_train 3000          # Qwen chat reader
+python -m pharmqa.generation.evaluate_chat --system lora --context gold --n 200
 python -m pharmqa.report_tables
 python app.py                          # local web app
 python scripts/deploy_space.py --space Emmanuel-NS/farumasi-pharmacist-qa   # needs HF_TOKEN; Space on free ZeroGPU hardware
@@ -195,7 +220,7 @@ python scripts/deploy_space.py --space Emmanuel-NS/farumasi-pharmacist-qa   # ne
 pharmqa/data/        download, preparation, intent data, essential-medicines list
 pharmqa/intent/      TF-IDF baseline, DistilBERT fine-tuning
 pharmqa/retrieval/   BM25, dense MiniLM (zero-shot, fine-tuned, hybrid), metrics
-pharmqa/generation/  Flan-T5 + LoRA reader training and evaluation
+pharmqa/generation/  Flan-T5 + LoRA reader and Qwen2.5 + LoRA chat reader: training and evaluation
 pharmqa/safety.py    rule-based risk detector;  pharmqa/pipeline.py end-to-end assistant
 pharmqa/query.py     greetings, brand/lay-name expansion, medicine + section focus, passage cleaning
 app.py               Gradio web app;  notebooks/ Colab pipeline;  results/ metrics and error files
@@ -210,7 +235,7 @@ app.py               Gradio web app;  notebooks/ Colab pipeline;  results/ metri
 - Intent augmentation labels are heuristic; the challenge set is small and was used to refine the safety rules, so its safety score is optimistic.
 - ROUGE/BERTScore measure similarity to a reference, not clinical correctness.
 - The reader was trained to copy the relevant passage, so answers keep label wording (written for clinicians) rather than plain-language summaries; general symptom questions ("headache, what can I take?") get a description of the condition more often than treatment advice.
-- Only a few wrong openFDA labels (metformin, levonorgestrel) were corrected; other medicines may have the same combination-product problem.
+- Only a few wrong or missing openFDA labels (metformin, levonorgestrel, ulipristal) were corrected; other medicines may have the same combination-product problem.
 
 ## Acknowledgements and AI use
 

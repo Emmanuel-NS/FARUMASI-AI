@@ -4,7 +4,8 @@
       -> risk detector (rules)            -> safety warnings to show
       -> intent classifier (DistilBERT)   -> out_of_domain? politely decline
       -> retriever (fine-tuned MiniLM)    -> top passages from trusted sources
-      -> generator (Flan-T5 + LoRA)       -> short answer grounded in the top passage
+      -> reader (Qwen2.5-1.5B-Instruct + LoRA chat reader; Flan-T5 + LoRA as fallback)
+                                          -> answer grounded in the retrieved passages
       -> answer + warnings + sources + disclaimer
 
 Every component falls back to its baseline if the trained artifact is missing, so the app
@@ -12,6 +13,8 @@ still runs (with lower quality) before training on Colab has finished.
 """
 from __future__ import annotations
 
+import os
+import re
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -22,6 +25,8 @@ from pharmqa import safety
 from pharmqa.config import (CORPUS_EMB_PATH, GENERATOR_ADAPTER_DIR, GENERATOR_BASE_MODEL, INTENT_LABELS,
                             INTENT_MODEL_DIR, INTENT_TFIDF_PATH, RETRIEVER_BASE_MODEL, RETRIEVER_MODEL_DIR,
                             SUPPLEMENTARY_EMB_PATH, SUPPLEMENTARY_PATH)
+from pharmqa.generation.chat_common import build_messages
+from pharmqa.generation.chat_model import chat_generate, has_adapter, load_chat_model
 from pharmqa.generation.common import build_prompt, extractive_answer
 from pharmqa.query import (QueryAnalyzer, asks_section, clean_passage, drug_of, expand, is_follow_up, is_stub,
                            resolve_follow_up, section_of, small_talk, wants_detail)
@@ -60,9 +65,18 @@ NOTHING_MORE_REPLY = (
 )
 
 
-def _already_said(answer: str, previous_answers) -> bool:
+_WORD = re.compile(r"[a-z0-9]{4,}")
+
+
+def _already_said(answer: str, previous_answers, overlap: float = 0.8) -> bool:
+    """Same opening as an earlier answer, or (for the reworded chat answers) mostly the same words."""
     key = " ".join(answer.lower().split())[:80]
-    return bool(key) and any(key in " ".join(p.lower().split()) for p in previous_answers)
+    if not key:
+        return False
+    if any(key in " ".join(p.lower().split()) for p in previous_answers):
+        return True
+    words = set(_WORD.findall(answer.lower()))
+    return len(words) >= 8 and any(len(words & set(_WORD.findall(p.lower()))) >= overlap * len(words) for p in previous_answers)
 
 
 @dataclass
@@ -130,6 +144,9 @@ class PharmacistAssistant:
         self.emb = np.vstack([self.emb[keep.to_numpy()], extra_emb])
 
     def _load_generator(self):
+        if has_adapter() and os.environ.get("FARUMASI_READER", "qwen") != "flan":
+            tok, model = load_chat_model(device=self.device)
+            return tok, model, "qwen2.5_1.5b_lora"
         from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
         tok = AutoTokenizer.from_pretrained(GENERATOR_BASE_MODEL)
         model = AutoModelForSeq2SeqLM.from_pretrained(GENERATOR_BASE_MODEL)
@@ -197,6 +214,12 @@ class PharmacistAssistant:
             if i is None:
                 continue
             hit, drug = self._hit(i, sims, focus), self.drugs[i]
+            if self.chat:
+                # The chat reader writes the whole overview in one pass; here only pick unseen sections.
+                if not _already_said(clean_passage(hit["full"]).partition(". ")[2], previous_answers, overlap=0.6):
+                    parts.append(heading)
+                    hits.append(hit)
+                continue
             body = clean_passage(hit["full"]).partition(". ")[2] if heading == "Examples" else self.generate(f"{heading} ({drug})?", [hit["full"]])
             body = safety.localize(body)
             if _already_said(body, previous_answers):
@@ -205,10 +228,20 @@ class PharmacistAssistant:
             hits.append(hit)
         if not parts:
             return (NOTHING_MORE_REPLY.format(drug=drug), []) if drug else None
+        if self.chat:
+            return safety.localize(self.generate(text, [h["full"] for h in hits], detailed=True)), hits
         return "\n\n".join(parts), hits
 
+    @property
+    def chat(self) -> bool:
+        return bool(self.gen) and self.gen[2].startswith("qwen")
+
     @torch.no_grad()
-    def generate(self, question: str, passages: list[str]) -> str:
+    def generate(self, question: str, passages: list[str], detailed: bool = False) -> str:
+        if self.chat:
+            tok, model, _ = self.gen
+            return chat_generate(tok, model, [build_messages(question, passages, detailed)],
+                                 max_new_tokens=520 if detailed else 320)[0]
         passages = [clean_passage(p) for p in passages]
         if self.gen is None:
             return extractive_answer(passages[0])
@@ -243,6 +276,8 @@ class PharmacistAssistant:
             return Result(question, intent, conf, risk.level, OOD_REPLY, components=components, interpreted=q)
 
         overview = self.overview(q, previous_answers) if wants_detail(question) else None
+        if overview and not overview[1] and q == question:
+            overview = self.overview(q)  # the topic asked afresh later in the chat: start the overview again
         if overview:
             answer, hits = overview
         else:
@@ -254,12 +289,14 @@ class PharmacistAssistant:
                 # a neighbouring drug's label (e.g. metoclopramide when asked about metformin).
                 context = [h for h in hits if h["on_topic"]] or hits
                 examples = next((h for h in context if section_of(h["title"]) == "Examples"), None)
-                if examples and asks_section(question, "Examples"):
-                    answer = examples["text"]  # a brand-name list: the reader would only shorten or skip it
+                if examples and asks_section(question, "Examples") and not self.chat:
+                    answer = examples["text"]  # a brand-name list: the Flan reader would only shorten or skip it
                 else:
                     answer = safety.localize(self.generate(q, [h["full"] for h in context]))
-                # A vague follow-up that brings back an earlier answer gets the sections not shown yet.
+                # A vague follow-up that brings back an earlier answer gets the sections not shown yet;
+                # a specific question keeps its own answer even if it overlaps.
                 if (_already_said(answer, previous_answers) and not asks_section(question)
+                        and is_follow_up(question, self.analyzer.has_own_topic)
                         and (overview := self.overview(q, previous_answers))):
                     answer, hits = overview
         sources = [{"title": h["title"], "source": h["source"], "score": round(h["score"], 3), "text": h["text"],

@@ -161,7 +161,7 @@ def is_stub(passage_id: str, text: str) -> bool:
     words = text.split()
     if len(words) < 4:
         return True
-    return len(words) < 12 and (text.rstrip().endswith("...") or passage_id.endswith(":1") or not text[0].isupper())
+    return len(words) < 12 and (text.rstrip().endswith(("...", "\u2026")) or passage_id.endswith(":1") or not text[0].isupper())
 
 
 def clean_passage(full: str) -> str:

@@ -130,7 +130,8 @@ retriever it is 90%, see the earlier run in the git history).
 \* Upper bound, not a fair comparison: references are the first sentences of the gold passage,
 so copying the gold passage reproduces them almost exactly.
 
-- LoRA (rank 16, 0.7% of parameters trained) triples ROUGE-L over zero-shot Flan-T5,
+- LoRA (rank 16, 0.7% of parameters trained; 2 epochs on 4,000 training pairs, lr 3e-4,
+  effective batch 16, ~25 min on a Colab T4) triples ROUGE-L over zero-shot Flan-T5,
   which answers in ~9 words and often just names the medicine.
 - With noisy retrieved context, LoRA beats the extractive baseline (0.414 vs 0.395) because it
   learned to pick the relevant passage out of three instead of always copying the first one.
@@ -153,7 +154,7 @@ python -m pharmqa.safety_eval
 # GPU recommended (Colab T4): see notebooks/train_on_colab.ipynb
 python -m pharmqa.intent.transformer --train_file train_consumer
 python -m pharmqa.retrieval.dense --mode all
-python -m pharmqa.generation.train_lora
+python -m pharmqa.generation.train_lora --epochs 2 --max_train 4000   # settings behind the reported results
 python -m pharmqa.generation.evaluate --system lora --context retrieved
 python -m pharmqa.report_tables
 python app.py                          # local web app

@@ -6,7 +6,7 @@ from __future__ import annotations
 try:
     import spaces
 
-    gpu = spaces.GPU(duration=60)
+    gpu = spaces.GPU(duration=30)  # answers take ~5-10 s; ZeroGPU admits a request only if this much quota is left
 except ImportError:
     def gpu(fn):
         return fn

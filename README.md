@@ -204,6 +204,10 @@ without retraining any model, so the tables above are unchanged.
 | "are there any of 120hrs, I already passed 72hrs" | Warnings and storage of the morning-after pill | No ulipristal label in the corpus; the repeat check turned the specific question into an overview | Ulipristal (ella, up to 120 hours) label + lay terms ("120 hours", "5 days", "passed 72"); the overview fallback only fires for vague follow-ups |
 | "examples that I can find in Rwanda" | The US brand list as if it applied to Rwanda | No Rwandan emergency-contraceptive leaflet | The examples passage states that the sources have no list of products registered in Rwanda |
 | "you not answering what I asked you?" | "I couldn't find reliable information" | Complaint not recognised | Added to the feedback rule |
+| "what do you know about kopavitamins" | General vitamin text, as if it described the product | Product names absent from the sources were silently ignored | `NameChecker`: a product name after "about / called / taking..." that appears nowhere in the corpus gets an honest "I don't have information about a product called ...", plus general information when a known word is inside it ("vitamins"); no false alarms on 600 test questions (`scripts/check_names.py`) |
+| "what do you know about quarteme" | "I couldn't find reliable information" | Misspelt brand name | Closest known medicine name (fuzzy match): "the closest name in my sources is coartem", then the Coartem overview |
+| "after sex pills" (just a name) | Dosage only | Treated as a narrow question | A bare name gets the overview |
+| "what is that?" | "Levonorgestrel can cause side effects. Use for women to ..." | The chat reader sometimes picks the opening sentence of another section | "What is that/it" maps to the uses section, and an opening sentence announcing a different section than the one asked is replaced |
 
 The original download picked, for each medicine, the openFDA label with the most patient
 sections, which sometimes selected a combination product. `scripts/fetch_supplementary.py`

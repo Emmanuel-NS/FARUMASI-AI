@@ -25,11 +25,12 @@ from pharmqa import safety
 from pharmqa.config import (CORPUS_EMB_PATH, GENERATOR_ADAPTER_DIR, GENERATOR_BASE_MODEL, INTENT_LABELS,
                             INTENT_MODEL_DIR, INTENT_TFIDF_PATH, RETRIEVER_BASE_MODEL, RETRIEVER_MODEL_DIR,
                             SUPPLEMENTARY_EMB_PATH, SUPPLEMENTARY_PATH)
-from pharmqa.generation.chat_common import build_messages
+from pharmqa.generation.chat_common import build_messages, fix_opener
 from pharmqa.generation.chat_model import chat_generate, has_adapter, load_chat_model
 from pharmqa.generation.common import build_prompt, extractive_answer
-from pharmqa.query import (QueryAnalyzer, asks_section, clean_passage, drug_of, expand, is_follow_up, is_stub,
-                           resolve_follow_up, section_of, small_talk, wants_detail)
+from pharmqa.query import (NameChecker, QueryAnalyzer, asks_section, clean_passage, drug_of, expand, is_bare_topic,
+                           is_follow_up, is_stub, resolve_follow_up, section_of, sections_asked, small_talk,
+                           wants_detail)
 from pharmqa.retrieval.common import load_corpus
 
 OOD_REPLY = (
@@ -39,6 +40,19 @@ OOD_REPLY = (
 LOW_CONFIDENCE_REPLY = (
     "I couldn't find reliable information about this in my medicine and health sources. If it is a health "
     "question, please ask a pharmacist or doctor directly."
+)
+UNKNOWN_REPLY = (
+    "I don't have any information about \u201c{name}\u201d in my sources, so I can't tell you what it contains or "
+    "whether it is safe for you. If it is a medicine or supplement, look at the active ingredients printed on the "
+    "package (for example \"zinc\", \"vitamin C\" or \"paracetamol\") and ask me about those, or ask a pharmacist."
+)
+UNKNOWN_MATCH = (
+    "I don't know \u201c{name}\u201d; the closest name in my sources is **{match}**, so here is information about it. "
+    "If you meant something else, tell me the active ingredients printed on the package.\n\n"
+)
+UNKNOWN_PART = (
+    "I don't have information about a product called \u201c{name}\u201d (it may be a local brand), so I can't say what "
+    "it contains. Check the active ingredients on its label and ask me about them. In general, about {part}:\n\n"
 )
 MIN_RETRIEVAL_SIM = 0.35  # below this cosine similarity the top passage is unlikely to be relevant
 CANDIDATES = 50           # dense hits re-ranked by the medicine / section the question names
@@ -115,6 +129,7 @@ class PharmacistAssistant:
         self.drugs = [drug_of(t, s) for t, s in zip(self.titles, self.corpus["source"])]
         self.stub = np.array([is_stub(i, t) for i, t in zip(self.corpus["id"], self.corpus["text"].fillna(""))])
         self.analyzer = QueryAnalyzer(self.drugs)
+        self.names = NameChecker(self.corpus["full"], self.drugs)
         self.gen = self._load_generator() if use_generator else None
 
     # Components -----------------------------------------------------------------
@@ -219,8 +234,12 @@ class PharmacistAssistant:
         if not focus.drugs:
             return None
         cands = []
+        ids, texts = self.corpus["id"], self.corpus["text"].fillna("").tolist()
         for heading, sections in OVERVIEW:
-            i = next((i for i in order if self.drugs[i] in focus.drugs and section_of(self.titles[i]) in sections), None)
+            match = [i for i in order if self.drugs[i] in focus.drugs and section_of(self.titles[i]) in sections]
+            # Prefer passages that start a sentence: later chunks and some two-column leaflet PDFs start mid-sentence.
+            starts = [i for i in match if str(ids.iloc[i]).endswith(":0") and texts[i][:1].isupper()]
+            i = (starts or match or [None])[0]
             if i is not None:
                 cands.append((heading, self._hit(i, sims, focus), self.drugs[i]))
         if not cands:
@@ -292,13 +311,23 @@ class PharmacistAssistant:
             return Result(question, "small_talk", 1.0, "routine", chat_reply, components=components, interpreted=question)
         q = self.resolve(question, list(earlier))
         risk = safety.assess(q)
+        prefix = ""
+        if unknown := self.names.check(question):
+            name, match, part = unknown
+            if match or part:
+                q = re.sub(re.escape(name), match or part, q, flags=re.I)
+                prefix = UNKNOWN_MATCH.format(name=name, match=match) if match else UNKNOWN_PART.format(name=name, part=part)
+            elif risk.level != "emergency":
+                return Result(question, "medicine_info", 1.0, risk.level, UNKNOWN_REPLY.format(name=name),
+                              risk.warnings() + [safety.DISCLAIMER], components=components, interpreted=q)
         intent, conf = self.classify(q)
 
         # Emergencies always get the safety message, even if the classifier is unsure.
         if intent == "out_of_domain" and risk.level != "emergency":
             return Result(question, intent, conf, risk.level, OOD_REPLY, components=components, interpreted=q)
 
-        overview = self.overview(q, previous_answers) if wants_detail(question) else None
+        detail = wants_detail(question) or is_bare_topic(question)
+        overview = self.overview(q, previous_answers) if detail else None
         if overview and not overview[1] and q == question:
             overview = self.overview(q)  # the topic asked afresh later in the chat: start the overview again
         if overview:
@@ -317,6 +346,8 @@ class PharmacistAssistant:
                 else:
                     # The chat reader sees the lay-term expansion, e.g. "120hrs" -> ulipristal emergency contraception.
                     answer = safety.localize(self.generate(expand(q) if self.chat else q, [h["full"] for h in context]))
+                    if self.chat:
+                        answer = fix_opener(answer, sections_asked(question), drug_of(context[0]["title"], context[0]["source"]))
                 # A vague follow-up that brings back an earlier answer gets the sections not shown yet;
                 # a specific question keeps its own answer even if it overlaps.
                 if (_already_said(answer, previous_answers) and not asks_section(question)
@@ -325,5 +356,5 @@ class PharmacistAssistant:
                     answer, hits = overview
         sources = [{"title": h["title"], "source": h["source"], "score": round(h["score"], 3), "text": h["text"],
                     "url": h.get("url") if isinstance(h.get("url"), str) else None} for h in hits]
-        return Result(question, intent, conf, risk.level, answer, risk.warnings() + [safety.DISCLAIMER], sources,
+        return Result(question, intent, conf, risk.level, prefix + answer, risk.warnings() + [safety.DISCLAIMER], sources,
                       components, interpreted=q)

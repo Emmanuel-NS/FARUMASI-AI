@@ -102,6 +102,32 @@ def opener(qtype: str, focus: str) -> str:
     return template.format(d=name, D=name[:1].upper() + name[1:])
 
 
+# Opening sentences the model learned, by the leaflet section they announce.
+_OPENER_SECTION = [(re.compile(r"^[^.]{0,80}?" + p + r"[^.]{0,60}\.\s*", re.I), s) for p, s in [
+    (r"can cause side effects", "Side effects"), (r"is used for the following", "Uses"),
+    (r"(is usually taken|dosing information for|should be used)", "Dosage"), (r"should not (take|use)", "Before you take"),
+    (r"important warnings for", "Warnings"), (r"can interact with other medicines", "Interactions"),
+    (r"(in pregnancy|during pregnancy and breastfeeding)", "Pregnancy"), (r"how to store", "Storage"),
+    (r"too much .{0,30}can be dangerous", "Overdose"),
+]]
+_SECTION_QTYPE = {"Uses": "uses", "Side effects": "side_effects", "Dosage": "dosage", "Before you take": "before",
+                  "Interactions": "drug_interactions", "Pregnancy": "pregnancy", "Storage": "storage", "Overdose": "overdosage"}
+
+
+def fix_opener(answer: str, asked: set[str], name: str) -> str:
+    """Replace an opening sentence that announces a different section from the one asked about
+    ("what is that?" answered with "Levonorgestrel can cause side effects. Use for women to ...")."""
+    for rx, section in _OPENER_SECTION:
+        m = rx.match(answer)
+        if not m:
+            continue
+        if not asked or section in asked:
+            return answer
+        qtype = next((_SECTION_QTYPE[s] for s in _SECTION_QTYPE if s in asked), "")
+        return f"{opener(qtype, name)} {answer[m.end():]}".strip()
+    return answer
+
+
 def answer_target(qtype: str, focus: str, gold_full: str) -> str:
     first = opener(qtype, focus)
     body = passage_body(gold_full)

@@ -7,7 +7,9 @@ medicine and section the question is actually about.
 """
 from __future__ import annotations
 
+import difflib
 import re
+from collections import Counter
 from dataclasses import dataclass, field
 
 SMALL_TALK = [
@@ -71,7 +73,8 @@ ASPECTS = [
     (r"side[- ]?effects?|adverse|reactions?", {"Side effects"}),
     (r"\bdos(e|es|age|ing)\b|how (much|many|often)|how to (take|use)|how (should|do|can|must) (i|you|we) (take|use)"
      r"|when (should|do) (i|you) take|\bper day\b|a day\b", {"Dosage", "How to take"}),
-    (r"used for|\buses?\b|what is .* for|treat|indicat|how does .* work|what do(es)? (it|they) do", {"Uses", "Purpose"}),
+    (r"used for|\buses?\b|what is .* for|treat|indicat|how does .* work|what do(es)? (it|they) do"
+     r"|what(?:'s| is| are) (that|it|this|those|these|they)\b", {"Uses", "Purpose"}),
     (r"pregnan|breast[- ]?feed", {"Pregnancy", "Pregnancy and breastfeeding"}),
     (r"interact|together with|\bwith (alcohol|other)|mix", {"Interactions"}),
     (r"stor(e|age)|keep|fridge", {"Storage"}),
@@ -123,11 +126,75 @@ def wants_detail(question: str) -> bool:
     return bool(_STRONG_DETAIL.search(question)) or (bool(_DETAIL.search(question)) and not asks_section(question))
 
 
+_QUESTION_WORD = re.compile(r"\?|\b(what|how|can|could|should|is|are|do|does|why|when|which|who|where|will)\b", re.I)
+
+
+def is_bare_topic(question: str) -> bool:
+    """Just a name ("after sex pills", "coartem"): answered with an overview, like "tell me about ..."."""
+    return len(question.split()) <= 4 and not _QUESTION_WORD.search(question) and not asks_section(question)
+
+
+_SUBJECT_AFTER = {"about", "called", "named", "is", "are", "of", "on", "take", "taking", "use", "using", "know"}
+_ARTICLES = {"a", "an", "the", "this", "some"}
+
+
+def _subject_words(question: str) -> list[str]:
+    """Words right after "about", "called", "taking"... (articles skipped): where a product name usually sits."""
+    tokens = re.findall(r"[A-Za-z][A-Za-z-]*", question)
+    out, prev = [], ""
+    for tok in tokens:
+        if tok.lower() in _ARTICLES:
+            continue
+        if prev in _SUBJECT_AFTER and len(tok) >= 5:
+            out.append(tok)
+        prev = tok.lower()
+    return out
+_GENERIC = ["supplement", "supplements", "medicine", "medicines", "medication", "drug", "drugs", "tablet", "tablets",
+            "pill", "pills", "product", "products", "syrup", "called", "named"]
+
+
+class NameChecker:
+    """Spots product names that appear nowhere in the sources ("Kopavitamin"), so the assistant can say so
+    instead of answering about something else. Typos of known names get the closest name ("quarteme" ->
+    coartem); typos of ordinary words are ignored."""
+
+    def __init__(self, texts, drug_names, min_count: int = 2):
+        counts = Counter(w for t in texts for w in re.findall(r"[a-z]{4,}", t.lower()))
+        self.vocab = {w for w, n in counts.items() if n >= min_count}
+        self.common = [w for w, n in counts.items() if n >= 3 and len(w) >= 5]
+        self.parts = [w for w, n in counts.items() if n >= 5 and len(w) >= 6]
+        brands = {w for p, _ in LAY_TERMS for w in re.findall(r"[a-z]{5,}", p)}
+        self.names = sorted({d for d in drug_names if d.isalpha()} | brands)
+
+    def _known(self, word: str) -> bool:
+        return word in self.vocab or word.rstrip("s") in self.vocab or word in self.names
+
+    def check(self, question: str) -> tuple[str, str | None, str | None] | None:
+        """(unknown name, closest known medicine name or None, known word inside it e.g. "vitamins" or None)."""
+        words = _subject_words(question)
+        if len(question.split()) <= 3:
+            words += re.findall(r"[A-Za-z][A-Za-z-]{4,}", question)
+        for word in words:
+            low = word.lower()
+            if self._known(low) or difflib.get_close_matches(low, _GENERIC, 1, 0.75):
+                continue
+            if difflib.get_close_matches(low, self.common, 1, 0.88):
+                continue  # a misspelt ordinary word ("diarhea"); the retriever copes with those
+            match = difflib.get_close_matches(low, self.names, 1, 0.65)
+            part = max((p for p in self.parts if p in low), key=len, default=None)
+            return word, (match[0] if match else None), part
+        return None
+
+
 def resolve_follow_up(question: str, topic: str | None, has_own_topic) -> str:
     """Attach the subject of the conversation (the last non-follow-up question) to a follow-up."""
     if not topic or not is_follow_up(question, has_own_topic):
         return question
     return f"{question}{FOLLOW_UP_MARK}{topic})"
+
+
+def sections_asked(text: str) -> set[str]:
+    return _sections(text)
 
 
 def _sections(text: str) -> set[str]:

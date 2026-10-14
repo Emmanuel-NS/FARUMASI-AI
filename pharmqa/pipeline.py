@@ -59,6 +59,18 @@ OVERVIEW = [
     ("Storage", {"Storage"}),
 ]
 OVERVIEW_PARTS = 5
+SECTION_QUESTIONS = {
+    "What it is for": "What is {d} used for?",
+    "How to take it": "How should I take {d}?",
+    "Who should not take it": "Who should not take {d}?",
+    "Possible side effects": "What are the side effects of {d}?",
+    "Warnings": "What are the warnings for {d}?",
+    "Ask a doctor or pharmacist first if": "When should I ask a doctor or pharmacist before taking {d}?",
+    "Other medicines": "Which medicines interact with {d}?",
+    "Pregnancy and breastfeeding": "Can I take {d} during pregnancy or breastfeeding?",
+    "If you take too much": "What happens if I take too much {d}?",
+    "Storage": "How should I store {d}?",
+}
 NOTHING_MORE_REPLY = (
     "That is everything my sources say about {drug}. For anything else (for example which brands are sold "
     "near you, or whether it suits you personally), please ask a pharmacist."
@@ -206,31 +218,42 @@ class PharmacistAssistant:
         focus, sims, order = self._rank(text)
         if not focus.drugs:
             return None
-        parts, hits, drug = [], [], None
+        cands = []
         for heading, sections in OVERVIEW:
+            i = next((i for i in order if self.drugs[i] in focus.drugs and section_of(self.titles[i]) in sections), None)
+            if i is not None:
+                cands.append((heading, self._hit(i, sims, focus), self.drugs[i]))
+        if not cands:
+            return None
+        drug = cands[0][2]
+        parts, hits = [], []
+        for (heading, hit, _), body in zip(cands, self._section_bodies(cands)):
             if len(parts) == OVERVIEW_PARTS:
                 break
-            i = next((i for i in order if self.drugs[i] in focus.drugs and section_of(self.titles[i]) in sections), None)
-            if i is None:
-                continue
-            hit, drug = self._hit(i, sims, focus), self.drugs[i]
-            if self.chat:
-                # The chat reader writes the whole overview in one pass; here only pick unseen sections.
-                if not _already_said(clean_passage(hit["full"]).partition(". ")[2], previous_answers, overlap=0.6):
-                    parts.append(heading)
-                    hits.append(hit)
-                continue
-            body = clean_passage(hit["full"]).partition(". ")[2] if heading == "Examples" else self.generate(f"{heading} ({drug})?", [hit["full"]])
-            body = safety.localize(body)
+            body = safety.localize(body())
             if _already_said(body, previous_answers):
                 continue
             parts.append(f"**{heading}:** {body}")
             hits.append(hit)
         if not parts:
-            return (NOTHING_MORE_REPLY.format(drug=drug), []) if drug else None
-        if self.chat:
-            return safety.localize(self.generate(text, [h["full"] for h in hits], detailed=True)), hits
-        return "\n\n".join(parts), hits
+            return NOTHING_MORE_REPLY.format(drug=drug), []
+        intro = f"Here is an overview of {drug}, based on its official leaflet.\n\n" if self.chat else ""
+        return intro + "\n\n".join(parts), hits
+
+    def _section_bodies(self, cands):
+        """One answer per overview section, as callables so the Flan reader only runs for sections shown.
+        The chat reader answers all sections in one batch (the headings stay ours, not the model's)."""
+        def passage(hit):
+            return lambda: clean_passage(hit["full"]).partition(". ")[2]
+
+        if not self.chat:
+            return [passage(hit) if heading == "Examples" else (lambda h=heading, x=hit, d=d: self.generate(f"{h} ({d})?", [x["full"]]))
+                    for heading, hit, d in cands]
+        tok, model, _ = self.gen
+        todo = [(k, SECTION_QUESTIONS[heading].format(d=d), hit) for k, (heading, hit, d) in enumerate(cands) if heading != "Examples"]
+        out = chat_generate(tok, model, [build_messages(q, [hit["full"]]) for _, q, hit in todo], max_new_tokens=180)
+        done = {k: text for (k, _, _), text in zip(todo, out)}
+        return [(lambda t=done[k]: t) if k in done else passage(hit) for k, (_, hit, _) in enumerate(cands)]
 
     @property
     def chat(self) -> bool:
@@ -292,7 +315,8 @@ class PharmacistAssistant:
                 if examples and asks_section(question, "Examples") and not self.chat:
                     answer = examples["text"]  # a brand-name list: the Flan reader would only shorten or skip it
                 else:
-                    answer = safety.localize(self.generate(q, [h["full"] for h in context]))
+                    # The chat reader sees the lay-term expansion, e.g. "120hrs" -> ulipristal emergency contraception.
+                    answer = safety.localize(self.generate(expand(q) if self.chat else q, [h["full"] for h in context]))
                 # A vague follow-up that brings back an earlier answer gets the sections not shown yet;
                 # a specific question keeps its own answer even if it overlaps.
                 if (_already_said(answer, previous_answers) and not asks_section(question)

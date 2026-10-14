@@ -1,0 +1,30 @@
+{
+  "system": "qwen2.5-1.5b_zeroshot",
+  "context": "gold",
+  "n": 199,
+  "rougeL": 0.3267,
+  "rougeL_recall": 0.3495,
+  "bertscore_f1": 0.8289,
+  "support": 0.6237,
+  "avg_words": 57.5,
+  "false_abstain": 0.0101,
+  "abstain_on_unrelated": 0.25,
+  "by_source": {
+    "MedQuAD": {
+      "rougeL": 0.3706,
+      "bertscore_f1": 0.8455
+    },
+    "MedicationQA": {
+      "rougeL": 0.2471,
+      "bertscore_f1": 0.8155
+    },
+    "RwandaFDA-PIL": {
+      "rougeL": 0.244,
+      "bertscore_f1": 0.799
+    },
+    "openFDA-templated": {
+      "rougeL": 0.3045,
+      "bertscore_f1": 0.8165
+    }
+  }
+}

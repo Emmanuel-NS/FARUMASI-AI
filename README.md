@@ -162,6 +162,27 @@ groundedness proxy) and abstention on unrelated passages. The app uses the chat 
 adapter is present and falls back to Flan-T5 + LoRA otherwise (`FARUMASI_READER=flan` forces it).
 Train and evaluate with `notebooks/train_chat_reader_colab.ipynb`.
 
+Same 199 stratified test questions as the Flan-T5 table (3,000 answer + overview + no-answer
+examples, 1 epoch on a Colab T4). "Retrieved" uses BM25 top 3 in this run, as in the Flan-T5 rows.
+
+| Reader | Context | ROUGE-L | ROUGE-L recall | BERTScore-F1 | Support | Avg words | Abstains on unrelated passages |
+|---|---|---|---|---|---|---|---|
+| Flan-T5-base + LoRA | gold | 0.608 | | 0.900 | | 37 | cannot abstain |
+| Qwen2.5-1.5B zero-shot | gold | 0.327 | 0.350 | 0.829 | 0.624 | 58 | 25% |
+| **Qwen2.5-1.5B + LoRA** (deployed) | gold | **0.643** | **0.900** | **0.911** | **0.964** | 104 | **73%** |
+| Flan-T5-base + LoRA | retrieved | 0.414 | | 0.841 | | 35 | cannot abstain |
+| **Qwen2.5-1.5B + LoRA** | retrieved | **0.432** | 0.607 | **0.847** | 0.930 | 99 | 73% |
+
+- LoRA doubles ROUGE-L over zero-shot Qwen (0.327 → 0.643). The zero-shot model paraphrases freely,
+  and only 62% of its content words come from the passages (support 0.62, against 0.96 after
+  fine-tuning), so it adds details that are not in the sources.
+- The chat reader beats the Flan-T5 reader on both contexts while writing ~3× longer answers: it
+  keeps 90% of the reference (ROUGE-L recall) and adds a direct opening sentence and more of the passage.
+- It abstains on 73% of questions whose passages are about other topics (zero-shot: 25%), and
+  never abstained wrongly when the right passage was present (false abstention 0%). In the
+  remaining 27% it can answer from a loosely related passage (e.g. "Childbirth problems" answered
+  with a family-history checklist), so the retrieval similarity threshold is kept as a second guard.
+
 ### Fixes from testing the live app
 
 Testing the deployed app with realistic patient messages exposed failures the benchmark did not
@@ -234,7 +255,7 @@ app.py               Gradio web app;  notebooks/ Colab pipeline;  results/ metri
 - English only; Kinyarwanda and French questions are out of scope for this version.
 - Intent augmentation labels are heuristic; the challenge set is small and was used to refine the safety rules, so its safety score is optimistic.
 - ROUGE/BERTScore measure similarity to a reference, not clinical correctness.
-- The reader was trained to copy the relevant passage, so answers keep label wording (written for clinicians) rather than plain-language summaries; general symptom questions ("headache, what can I take?") get a description of the condition more often than treatment advice.
+- Both readers are trained on targets built from the passages, so answers keep label wording (written for clinicians) rather than plain-language summaries; general symptom questions ("headache, what can I take?") get a description of the condition more often than treatment advice.
 - Only a few wrong or missing openFDA labels (metformin, levonorgestrel, ulipristal) were corrected; other medicines may have the same combination-product problem.
 
 ## Acknowledgements and AI use

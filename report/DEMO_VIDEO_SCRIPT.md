@@ -1,249 +1,112 @@
-# Demo video — full read-aloud script
+# Demo video script (about 5 minutes)
 
-**Time:** about 7 to 8 minutes  
-**Before you press record:**
-1. Open this page and stay signed in: https://huggingface.co/spaces/Emmanuel-NS/farumasi-pharmacist-qa  
-2. Wait until the Space says **Running** (first load can take 1–2 minutes).  
-3. Also open GitHub in another tab: https://github.com/Emmanuel-NS/FARUMASI-AI  
-4. Have the PDF open if you want: `report/Emmanuel_Nsabagasani_FARUMASI_Pharmacist_QA_Report.pdf`  
-5. Speak slowly. When you see `[SHOW: ...]`, do that action, then keep reading.
+**Before recording:** sign into Hugging Face, open the Space, wait until it says **Running**.  
+Live app: https://huggingface.co/spaces/Emmanuel-NS/farumasi-pharmacist-qa  
+GitHub: https://github.com/Emmanuel-NS/FARUMASI-AI
 
-Copy the spoken lines below into a teleprompter app, or print this file and read it.
+Read the **SAY** lines. Do the **DO** actions when you see them.
 
 ---
 
-## PART 1 — Introduction (about 30 seconds)
+### 1. Intro (20 sec)
 
-**Say:**
-
-Hello. My name is Emmanuel Nsabagasani. This video is my demo for the Natural Language Processing summative project.
-
-The project is called FARUMASI Pharmacist Assistant. It is a domain-specific English question-answering system for medicine and minor-ailment questions in Rwanda.
-
-In this video I will explain the problem, the data, the models I trained, the experiments, the evaluation, and then I will demonstrate the live web application.
+**SAY:**  
+Hi, I am Emmanuel Nsabagasani. This is my NLP summative: FARUMASI Pharmacist Assistant. It answers routine medicine questions in English using trusted leaflet text. I will cover the problem, model, experiments, evaluation, and a live demo.
 
 ---
 
-## PART 2 — Problem and why I built this (about 1 minute)
+### 2. Problem (40 sec)
 
-**Say:**
-
-The idea came from FARUMASI, a digital pharmacy platform I have been building in Rwanda.
-
-While working with pharmacies, I noticed that patients ask the same basic questions again and again. What is this medicine for? What are the side effects? How should I take it? Pharmacists can answer these questions, but they are busy. They also have to dispense medicines, check prescriptions, and counsel people.
-
-So the goal of this project is to answer routine informational questions from trusted leaflet text, and to send people to a pharmacist when the answer is missing or the situation is risky. That can reduce the number of repeated questions directed at busy pharmacies.
-
-I did not use a commercial chatbot API. ChatGPT and similar tools can invent doses. My system only answers from a fixed corpus of trusted passages, and it must refuse when it does not know.
-
-The language is English only for this version. Most official labels and training resources are in English. Patients in Rwanda often still use English brand names, so I also map local phrases such as panadol to paracetamol, and after sex pills to levonorgestrel.
-
-Target users are adult patients and caregivers. This is not a doctor and not a pharmacist. Every answer has a disclaimer. Emergencies go to SAMU on nine one two.
+**SAY:**  
+I built this because of FARUMASI, my digital pharmacy platform in Rwanda. Pharmacists are busy, but patients keep asking the same basic questions: what is this for, side effects, how do I take it. A normal chatbot can invent doses. My system only answers from trusted sources, refuses when it does not know, and sends emergencies to SAMU 912. Language is English. Users are patients and caregivers. It is not a doctor.
 
 ---
 
-## PART 3 — Dataset (about 45 seconds)
+### 3. Data (25 sec)
 
-`[SHOW: GitHub README — scroll to the Data table]`
+**DO:** Open GitHub README, Data table.
 
-**Say:**
-
-Here is the dataset summary in my GitHub README.
-
-I used human-written sources only. No generated gold answers.
-
-First, openFDA drug labels for about one hundred and forty WHO essential medicines.  
-Second, MedQuAD for condition and health-topic questions.  
-Third, MedicationQA for real consumer medicine questions.  
-Fourth, Rwanda FDA patient information leaflets for local brands such as Coartem.  
-Fifth, CLINC150 for out-of-domain negatives.  
-And a small challenge set of fifty-six informal questions that I labelled myself for evaluation.
-
-In total there are eight thousand eight hundred and forty passages, and about nine thousand five hundred question-answer pairs. Splits are grouped by medicine so the same drug does not leak from train into test.
-
-A limitation is that some openFDA questions are templated, and many Rwanda PDFs were scanned images with no text layer, so those were excluded.
+**SAY:**  
+Data comes from openFDA, MedQuAD, MedicationQA, Rwanda FDA leaflets, and CLINC150. About 8,800 passages and 9,500 questions. Splits are grouped by medicine so nothing leaks. Limitation: some Rwanda PDFs were scanned and could not be used.
 
 ---
 
-## PART 4 — How the model works (about 2 minutes) — READ CAREFULLY
+### 4. Model (60 sec) — important for marks
 
-`[SHOW: GitHub README — System overview diagram, or open pharmqa/pipeline.py briefly]`
+**DO:** Show the system overview in the README.
 
-**Say:**
+**SAY:**  
+The pipeline has five parts.  
+One: rules for greetings and emergencies.  
+Two: DistilBERT classifies intent: medicine, condition, or out of scope.  
+Three: I expand local names, like panadol to paracetamol.  
+Four: MiniLM retrieves the best leaflet passages.  
+Five: Qwen 1.5B with LoRA writes the answer from those passages only.  
 
-Now I will explain the model pipeline, step by step.
-
-When a user types a question, it first goes through simple rules. Greetings get a short hello. Feedback is recorded. A risk detector looks for emergencies such as overdose or chest pain. If it is an emergency, the system tells the person to seek urgent care and call nine one two.
-
-Next is the intent classifier. I fine-tuned DistilBERT, which is a small Transformer encoder. The input is the tokenised question, maximum length sixty-four. The output is one of three labels: medicine information, condition advice, or out of domain. If it is out of domain, we refuse and we never retrieve medicine text.
-
-Then I expand the query. Local lay terms and brand names are rewritten into forms the corpus understands. For example panadol becomes paracetamol. Coartem stays linked to artemether and lumefantrine. After sex pills becomes levonorgestrel.
-
-Then comes the retriever. I fine-tuned all-MiniLM-L6-v2, a bi-encoder. It turns the question and each passage into a three hundred and eighty-four dimensional embedding. Ranking is by cosine similarity. I also boost passages when the medicine name matches, and when the section matches what was asked, for example side effects versus dosage.
-
-Finally comes the answer reader. The deployed model is Qwen two point five, one point five billion, Instruct, adapted with LoRA. LoRA means Low-Rank Adaptation. I only train small adapter matrices instead of the full model, which fits on a free Colab T4 GPU.
-
-Important hyperparameters for the Qwen LoRA run: LoRA rank sixteen, alpha thirty-two, one epoch, batch size two with gradient accumulation eight, learning rate two times ten to the minus four, maximum length one thousand five hundred and thirty-six. Loss is computed only on the answer tokens, not on the prompt. I also trained a Flan-T5 base LoRA reader as a fallback.
-
-The reader must stay grounded. It only sees retrieved on-topic passages. If the product is not in the sources, it should say so instead of inventing ingredients.
-
-The output shown to the user is the answer, the source passages, and a disclaimer.
-
-I trained the chat reader using the Colab notebook and the script under pharmqa generation train chat lora.
+LoRA means I train small adapters, not the full model, on free Colab. Key settings: LoRA rank 16, one epoch, learning rate 2e-4, loss on answer tokens only. I also trained Flan-T5 LoRA as a backup.
 
 ---
 
-## PART 5 — Baselines and experiments (about 1 minute 15 seconds)
+### 5. Experiments (40 sec) — important for marks
 
-`[SHOW: README Results tables, or the PDF Tables 3 to 5]`
+**DO:** Show Results tables in README.
 
-**Say:**
+**SAY:**  
+Baselines: TF-IDF for intent, BM25 for retrieval, and zero-shot Qwen for answers.  
 
-I did not only train one model. I set baselines and ran controlled experiments.
+What I learned: formal test accuracy looked perfect, but real patient questions failed until I added consumer-style training data.  
 
-For intent, the baseline was TF-IDF with logistic regression. Then DistilBERT. The key experiment was training with versus without real patient questions. Models looked almost perfect on the formal test set, about ninety-nine percent accuracy, but they failed on informal consumer questions until I added patient-style data. Challenge accuracy rose to about eighty percent with DistilBERT plus patient questions. The lesson is that formal test scores can hide style overfitting.
+Fine-tuned MiniLM more than doubled BM25 Recall at 1.  
 
-For retrieval, the baselines were BM25 and zero-shot MiniLM. Then I fine-tuned MiniLM. Recall at one went from about point three two for BM25 to about point seven zero after fine-tuning. I also tested training with and without Rwanda leaflet questions. Adding Rwanda data helped only a little on local brands. The main gain came from learning question-to-section matching.
-
-For generation, baselines were extractive answers, Flan-T5 zero-shot, and Qwen zero-shot. Proposed models were Flan-T5 with LoRA and Qwen with LoRA. I evaluated with gold context, to isolate the reader, and with retrieved context, for end-to-end behaviour.
-
-The main result: with gold context, Qwen LoRA reached ROUGE-L of point six four three, versus point three two seven for zero-shot Qwen. Passage support rose from about point six two to point nine six. Abstention on unrelated passages rose from twenty-five percent to seventy-three percent. So LoRA taught the model to stay grounded and to refuse more often when the sources do not help.
+Qwen with LoRA raised ROUGE-L from 0.327 to 0.643, support from 0.62 to 0.96, and abstention from 25% to 73%. So fine-tuning made answers more grounded and safer.
 
 ---
 
-## PART 6 — Metrics and errors (about 45 seconds)
+### 6. Metrics and errors (20 sec)
 
-**Say:**
-
-I chose metrics that match each component. Accuracy and macro F1 for intent. Recall at k and MRR for retrieval. ROUGE-L and BERTScore for answer wording. Support measures how many answer content words appear in the passages. Abstention measures honest “I do not know” behaviour.
-
-These metrics are not clinical correctness. They measure agreement with trusted text and scope control.
-
-I will now show successes and failures live on the web app.
+**SAY:**  
+I used accuracy and F1 for intent, Recall and MRR for retrieval, ROUGE-L and BERTScore for answers, plus support and abstention for grounding. These are not clinical scores. Next I show live success and failure cases.
 
 ---
 
-## PART 7 — Live web demo (about 2 minutes 30 seconds)
+### 7. Live demo (2 min) — important for marks
 
-`[SHOW: Hugging Face Space chat interface. Paste each question, wait for the answer, then speak.]`
+**DO:** Open the Space chat.
 
-**Say before the first question:**
+**SAY:**  
+This Gradio app calls my trained models on ZeroGPU and shows the answer plus sources.
 
-This is the deployed Gradio web application on Hugging Face Spaces. Behind the interface, the app calls my PharmacistAssistant answer method. DistilBERT, MiniLM, and Qwen with LoRA run on ZeroGPU for each reply. The user sees the chat answer and the source passages.
+**DO:** Type `What are the side effects of metformin?`  
+**SAY:** Success. Side effects from the trusted label, with sources below.
 
-### Demo 1 — greeting
+**DO:** Type `after sex pills`  
+**SAY:** Local phrasing mapped to emergency contraception.
 
-`[TYPE: hey]`
+**DO:** Type `what do you know about quarteme`  
+**SAY:** Close-name fix. It suggests Coartem instead of inventing a drug.
 
-**Say:**
+**DO:** Type `what do you know about kopavitamins`  
+**SAY:** Failure handled honestly. Product not in sources. Better than a fake answer.
 
-This is a greeting. The rules handle it without calling the full reader. The system introduces itself briefly.
-
-### Demo 2 — success: metformin side effects
-
-`[TYPE: What are the side effects of metformin?]`
-
-**Say while it answers:**
-
-This is a successful case. The intent is medicine information. The retriever finds metformin passages. The Qwen LoRA reader opens with a side-effects framing and lists effects from the trusted label, such as diarrhoea or nausea. Below the answer you can see the source passages.
-
-`[TYPE: and how should I take it?]`
-
-**Say:**
-
-This is a follow-up. The system keeps metformin as the topic and answers about how to take it, still from the retrieved text.
-
-### Demo 3 — success: emergency contraception lay language
-
-`[TYPE: after sex pills]`
-
-**Say:**
-
-Here the query expansion maps after sex pills to levonorgestrel. The system gives an overview from the leaflet text.
-
-`[TYPE: are there any of 120hrs]`
-
-**Say:**
-
-Now it should discuss the one hundred and twenty hour option, ulipristal, still grounded in sources. This shows local patient phrasing, not only formal drug names.
-
-### Demo 4 — fuzzy name: quarteme
-
-`[TYPE: what do you know about quarteme]`
-
-**Say:**
-
-Quarteme is a misspelling or near name for Coartem. The system should suggest Coartem and give a malaria overview for artemether and lumefantrine, instead of inventing a fake product.
-
-### Demo 5 — honest failure: unknown product
-
-`[TYPE: what do you know about kopavitamins]`
-
-**Say:**
-
-This is an unsuccessful or honest-refusal case. Kopavitamin is not in my leaflet corpus. A good system must not invent ingredients. Mine should say the product is not in the sources, and suggest asking a pharmacist. That behaviour is important for FARUMASI, because a wrong confident answer is worse than no answer.
-
-### Demo 6 — out of scope
-
-`[TYPE: what is the exchange rate of the rwandan franc?]`
-
-**Say:**
-
-This is out of domain. The DistilBERT intent classifier should refuse. No medicine answer is invented.
+**DO:** Type `what is the exchange rate of the rwandan franc?`  
+**SAY:** Out of scope. Intent model refuses.
 
 ---
 
-## PART 8 — GitHub and reproducibility (about 30 seconds)
+### 8. Close (20 sec)
 
-`[SHOW: GitHub repo — README reproduce section, then open the results folder]`
+**DO:** Show GitHub repo quickly.
 
-**Say:**
-
-Everything needed to reproduce the project is on GitHub under Emmanuel-NS FARUMASI-AI.
-
-The README has setup instructions. The notebooks folder has the Colab training notebooks. The results folder has the JSON metric files that match the tables in my report. Anyone can clone the repo, prepare the data, and run the app locally with python app.py.
+**SAY:**  
+Code, notebooks, and results JSON are on GitHub for reproducibility. I designed the pipeline, ran training, and tested the live app. Limits: English only, not medical advice. Goal: fewer repeated questions for busy pharmacies, safer first answers for patients. Thank you.
 
 ---
 
-## PART 9 — Closing / ownership (about 30 seconds)
+## If they ask (one-line answers)
 
-**Say:**
-
-To close: I defined the problem from FARUMASI and from busy community pharmacies. I prepared the datasets, fine-tuned DistilBERT, MiniLM, and the Qwen LoRA reader, ran the baselines and experiments, analysed errors, and deployed the Gradio app.
-
-AI coding tools helped me scaffold some code, but I ran the training, checked the metrics, tested the live app, and I take full responsibility for this submission.
-
-Limitations: English only, not clinical advice, and some local brands are missing from the leaflets. Future work is multilingual support, clinician review, and tighter integration into FARUMASI so routine questions are answered before they reach a busy pharmacy counter.
-
-Thank you for watching. Links to the GitHub repository, the live Space, and the research report PDF are in the submission.
-
----
-
-## Quick cheat sheet (if you freeze)
-
-| Topic | One sentence |
+| Question | Answer |
 |---|---|
-| Problem | Answer routine medicine questions from trusted text so busy pharmacies get fewer repeated questions. |
-| Models | DistilBERT intent, MiniLM retriever, Qwen 1.5B + LoRA reader. |
-| Best number | Qwen LoRA ROUGE-L 0.643 vs zero-shot 0.327; support 0.96 vs 0.62. |
-| Why LoRA | Train small adapters on free Colab without updating the full model. |
-| Demo success | Metformin side effects; after sex pills; quarteme to Coartem. |
-| Demo fail | Kopavitamins not in sources; franc exchange rate out of scope. |
-| Deployment | Gradio on Hugging Face Spaces, ZeroGPU for each answer. |
-
-## Questions they might ask you (short answers)
-
-**Why not just use ChatGPT?**  
-Because it can invent doses, and the brief forbids a plain API chatbot. My answers must come from a known corpus.
-
-**What is LoRA?**  
-Low-Rank Adaptation. I freeze the base Qwen weights and train small rank-sixteen matrices. That is how I fine-tuned on a free T4.
-
-**What is support?**  
-The share of answer content words that also appear in the retrieved passages. Higher support means more grounded answers.
-
-**Why English?**  
-Training labels and leaflets with usable text are mostly English. Multilingual is future work.
-
-**Is this medical advice?**  
-No. It is an informational prototype with a disclaimer. Emergencies go to SAMU 912.
+| Why not ChatGPT? | It can invent doses; my brief requires a trained, grounded model. |
+| What is LoRA? | Small adapters on a frozen model so I can fine-tune on free Colab. |
+| Best result? | Qwen LoRA: ROUGE-L 0.643 vs 0.327 zero-shot. |
+| Medical advice? | No. Disclaimer on every answer. Emergencies: call 912. |

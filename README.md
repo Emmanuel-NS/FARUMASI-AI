@@ -8,7 +8,7 @@ recognising questions outside its scope and flagging risky situations.
 | | |
 |---|---|
 | **Live system** | [huggingface.co/spaces/Emmanuel-NS/farumasi-pharmacist-qa](https://huggingface.co/spaces/Emmanuel-NS/farumasi-pharmacist-qa) |
-| **Demo video** | `<add YouTube/Drive link after recording>` |
+| **Demo video** | [Google Drive](https://drive.google.com/file/d/16IwvICqKY8QzQOUYAPXbfEmvHhQu8fOS/view?usp=sharing) |
 | **Report** | [`report/Emmanuel_Nsabagasani_FARUMASI_Pharmacist_QA_Report.pdf`](report/Emmanuel_Nsabagasani_FARUMASI_Pharmacist_QA_Report.pdf) · [video script](report/DEMO_VIDEO_SCRIPT.md) |
 
 > Student research prototype. It is **not** a substitute for a pharmacist or doctor.

@@ -265,5 +265,5 @@ app.py               Gradio web app;  notebooks/ Colab pipeline;  results/ metri
 ## Acknowledgements and AI use
 
 Datasets and models are credited above and in the report. AI coding assistance was used to
-scaffold code and draft the challenge set; all code, data and results were reviewed, run and
-verified by the author, who is responsible for the submission.
+scaffold code by refining and debugging some errors, and draft the challenge set; all code, data and results were reviewed, run,
+verified and done by the me.
